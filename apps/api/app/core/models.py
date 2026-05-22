@@ -123,6 +123,9 @@ class AuditResult(Base):
     actual_value: Mapped[str | None] = mapped_column(Text)
     expected_value: Mapped[str | None] = mapped_column(Text)
     weight: Mapped[int] = mapped_column(Integer)
+    score_value: Mapped[int] = mapped_column(Integer, default=0)
+    fix_suggestion: Mapped[str | None] = mapped_column(Text)
+    is_summary: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 

@@ -8,6 +8,7 @@ from app.criteria.router import router as criteria_router
 from app.files.router import router as files_router
 from app.projects.router import router as projects_router
 from app.reports.router import router as reports_router
+from app.users.router import router as users_router
 
 
 def create_app() -> FastAPI:
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
         return {"status": "ok", "service": "valida-ifc-api"}
 
     api.include_router(auth_router)
+    api.include_router(users_router)
     api.include_router(projects_router)
     api.include_router(files_router)
     api.include_router(criteria_router)

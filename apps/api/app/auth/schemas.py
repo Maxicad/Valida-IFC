@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from pydantic import ConfigDict
 
 
 class RegisterRequest(BaseModel):
@@ -19,6 +20,8 @@ class TokenResponse(BaseModel):
 
 
 class CurrentUserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str
     email: EmailStr

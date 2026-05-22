@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class AuditCreate(BaseModel):
@@ -10,9 +10,14 @@ class AuditCreate(BaseModel):
 
 
 class AuditRunResponse(AuditCreate):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     status: str
     score_percent: float | None = None
+    score_low: float | None = None
+    score_moderate: float | None = None
+    score_high: float | None = None
     total_criteria: int = 0
     approved_criteria: int = 0
     failed_criteria: int = 0
@@ -21,6 +26,8 @@ class AuditRunResponse(AuditCreate):
 
 
 class AuditResultResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     criteria_id: str
     code: str
     status: str
@@ -30,4 +37,8 @@ class AuditResultResponse(BaseModel):
     expected_value: str | None = None
     element_guid: str | None = None
     element_type: str | None = None
+    element_name: str | None = None
     weight: int
+    score_value: int = 0
+    fix_suggestion: str | None = None
+    is_summary: bool = False

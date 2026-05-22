@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ProjectBase(BaseModel):
@@ -28,6 +28,8 @@ class ProjectUpdate(BaseModel):
 
 
 class ProjectResponse(ProjectBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     created_at: datetime
     updated_at: datetime

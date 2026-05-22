@@ -39,6 +39,8 @@ Suba a infraestrutura e a API via Docker:
 docker compose up --build
 ```
 
+Por padrao, o PostgreSQL local e publicado em `5433` e o Redis em `6380`, para evitar conflito com outros projetos. A API usa os nomes internos `postgres:5432` e `redis:6379` dentro do Compose.
+
 Frontend:
 
 ```powershell

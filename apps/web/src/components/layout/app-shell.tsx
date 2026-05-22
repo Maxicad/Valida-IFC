@@ -6,17 +6,18 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
-  LogOut,
   Upload,
   View,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
+import { LogoutLink } from "@/components/layout/logout-link";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projetos", label: "Projetos", icon: FolderKanban },
+  { href: "/projetos/upload", label: "Upload IFC", icon: Upload },
   { href: "/criterios", label: "Criterios", icon: ClipboardCheck },
   { href: "/auditorias", label: "Auditorias", icon: BarChart3 },
   { href: "/visualizador", label: "Visualizador", icon: View },
@@ -66,10 +67,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             <Upload className="h-4 w-4" />
             MVP base
           </div>
-          <Link href="/login" className="flex items-center gap-2 text-sm font-medium text-ink/70">
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Link>
+          <LogoutLink />
         </header>
         <main className="mx-auto w-full max-w-7xl px-5 py-6">{children}</main>
       </div>

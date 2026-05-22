@@ -12,6 +12,7 @@ Stack:
 ## Modulos
 
 - `auth`
+- `users`
 - `projects`
 - `files`
 - `criteria`
@@ -22,6 +23,10 @@ Stack:
 ## Decisoes
 
 - Rotas ja seguem o contrato do produto.
-- Upload IFC valida extensao e tamanho.
+- Autenticacao usa senha com hash, login com JWT e protecao Bearer nas rotas internas.
+- CRUD de usuarios, projetos, conjuntos de criterios, criterios e arquivos IFC usa SQLAlchemy.
+- Upload IFC valida extensao e tamanho, salva em storage local e registra metadados no banco.
+- Importacao de criterios aceita CSV, TXT, XLS e XLSX com validacao por linha.
+- Auditoria inicial avalia regras basicas contra o IFC salvo e persiste `audit_runs` e `audit_results`.
 - Leitura de schema usa o cabecalho `FILE_SCHEMA`.
-- Persistencia real sera ligada na etapa de backend base com migrations.
+- Alembic controla a criacao e evolucao do schema.

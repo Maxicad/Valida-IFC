@@ -1,16 +1,125 @@
-import { Bot, FileSpreadsheet, Plus } from "lucide-react";
+"use client";
+
+import { Bot, FileSpreadsheet, Plus, RefreshCcw } from "lucide-react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
-const criteria = [
-  ["IFC-001", "Versao minima IFC", "Metadados", "alta"],
-  ["IFC-002", "Existencia de IfcProject", "Estrutura IFC", "alta"],
-  ["IFC-005", "Ambientes com nome", "Espacos", "moderada"],
-];
+import { apiGet, apiPost, apiUpload } from "@/services/api";
+import type { CriteriaImportResponse, CriteriaSet, Criterion } from "@/types/api";
 
 export default function CriteriaPage() {
+  const [criteriaSets, setCriteriaSets] = useState<CriteriaSet[]>([]);
+  const [criteria, setCriteria] = useState<Criterion[]>([]);
+  const [selectedSetId, setSelectedSetId] = useState("");
+  const [setName, setSetName] = useState("Criterios BIM Basicos");
+  const [criterionCode, setCriterionCode] = useState("IFC-001");
+  const [criterionName, setCriterionName] = useState("Versao minima IFC");
+  const [error, setError] = useState<string | null>(null);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importResult, setImportResult] = useState<CriteriaImportResponse | null>(null);
+
+  async function loadCriteriaSets() {
+    setError(null);
+    try {
+      const sets = await apiGet<CriteriaSet[]>("/criteria-sets");
+      setCriteriaSets(sets);
+      setSelectedSetId((current) => current || sets[0]?.id || "");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Nao foi possivel carregar conjuntos.");
+    }
+  }
+
+  const loadCriteria = useCallback(async (criteriaSetId: string) => {
+    if (!criteriaSetId) {
+      setCriteria([]);
+      return;
+    }
+    try {
+      setCriteria(await apiGet<Criterion[]>(`/criteria?criteria_set_id=${criteriaSetId}`));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Nao foi possivel carregar criterios.");
+    }
+  }, []);
+
+  async function createCriteriaSet(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    try {
+      const created = await apiPost<CriteriaSet>("/criteria-sets", {
+        name: setName,
+        source_type: "manual",
+      });
+      setSelectedSetId(created.id);
+      await loadCriteriaSets();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Nao foi possivel criar conjunto.");
+    }
+  }
+
+  async function createCriterion(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedSetId) {
+      setError("Crie ou selecione um conjunto de criterios.");
+      return;
+    }
+    try {
+      await apiPost<Criterion>("/criteria", {
+        criteria_set_id: selectedSetId,
+        code: criterionCode,
+        name: criterionName,
+        category: "Metadados",
+        severity: "alta",
+        rule_type: "ifc_schema",
+        property_name: "FILE_SCHEMA",
+        operator: "in",
+        expected_value: "IFC4|IFC4X3",
+        active: true,
+      });
+      await loadCriteria(selectedSetId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Nao foi possivel criar criterio.");
+    }
+  }
+
+  async function importCriteria(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!importFile) {
+      setError("Selecione um arquivo CSV, TXT, XLS ou XLSX.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", importFile);
+    if (selectedSetId) {
+      formData.append("criteria_set_id", selectedSetId);
+    }
+
+    try {
+      setError(null);
+      const result = await apiUpload<CriteriaImportResponse>("/criteria-sets/import", formData);
+      setImportResult(result);
+      setSelectedSetId(result.criteria_set.id);
+      await loadCriteriaSets();
+      await loadCriteria(result.criteria_set.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Nao foi possivel importar criterios.");
+    }
+  }
+
+  function selectImportFile(event: ChangeEvent<HTMLInputElement>) {
+    setImportFile(event.target.files?.[0] ?? null);
+    setImportResult(null);
+  }
+
+  useEffect(() => {
+    void loadCriteriaSets();
+  }, []);
+
+  useEffect(() => {
+    void loadCriteria(selectedSetId);
+  }, [loadCriteria, selectedSetId]);
+
   return (
     <AppShell>
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -19,11 +128,15 @@ export default function CriteriaPage() {
           <p className="text-sm text-ink/65">Importacao, cadastro manual e sugestoes por linguagem natural.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary">
+          <Button onClick={() => void loadCriteria(selectedSetId)} variant="secondary">
+            <RefreshCcw className="h-4 w-4" />
+            Atualizar
+          </Button>
+          <Button variant="secondary" type="button">
             <FileSpreadsheet className="h-4 w-4" />
             Importar
           </Button>
-          <Button>
+          <Button type="button">
             <Plus className="h-4 w-4" />
             Novo
           </Button>
@@ -32,19 +145,103 @@ export default function CriteriaPage() {
 
       <section className="grid gap-4 xl:grid-cols-[1fr_380px]">
         <Card>
+          <div className="mb-4 flex flex-col gap-3 md:flex-row">
+            <select
+              className="h-10 flex-1 rounded-md border border-line bg-white px-3 text-sm"
+              onChange={(event) => setSelectedSetId(event.target.value)}
+              value={selectedSetId}
+            >
+              <option value="">Selecione um conjunto</option>
+              {criteriaSets.map((criteriaSet) => (
+                <option key={criteriaSet.id} value={criteriaSet.id}>
+                  {criteriaSet.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {error && <p className="mb-4 rounded-md bg-coral/10 px-3 py-2 text-sm text-coral">{error}</p>}
           <div className="overflow-hidden rounded-md border border-line">
-            {criteria.map(([code, name, category, severity]) => (
-              <div key={code} className="grid gap-3 border-b border-line px-4 py-3 text-sm last:border-0 md:grid-cols-4">
-                <strong>{code}</strong>
-                <span>{name}</span>
-                <span className="text-ink/65">{category}</span>
-                <span className="text-right font-semibold capitalize text-coral">{severity}</span>
-              </div>
-            ))}
+            {criteria.length === 0 ? (
+              <div className="px-4 py-3 text-sm text-ink/60">Nenhum criterio cadastrado.</div>
+            ) : (
+              criteria.map((criterion) => (
+                <div
+                  key={criterion.id}
+                  className="grid gap-3 border-b border-line px-4 py-3 text-sm last:border-0 md:grid-cols-4"
+                >
+                  <strong>{criterion.code}</strong>
+                  <span>{criterion.name}</span>
+                  <span className="text-ink/65">{criterion.category ?? criterion.rule_type}</span>
+                  <span className="text-right font-semibold capitalize text-coral">
+                    {criterion.severity}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </Card>
 
         <Card>
+          <form className="mb-5 border-b border-line pb-5" onSubmit={importCriteria}>
+            <h2 className="mb-3 font-semibold">Importar criterios</h2>
+            <input
+              accept=".csv,.txt,.xls,.xlsx"
+              className="w-full rounded-md border border-line bg-white px-3 py-2 text-sm"
+              onChange={selectImportFile}
+              type="file"
+            />
+            <Button className="mt-3 w-full" type="submit" variant="secondary">
+              <FileSpreadsheet className="h-4 w-4" />
+              Importar arquivo
+            </Button>
+            {importResult && (
+              <div className="mt-3 rounded-md bg-surface p-3 text-sm">
+                <strong className="block">Importacao concluida</strong>
+                <span className="text-ink/65">
+                  {importResult.imported_count}/{importResult.total_rows} importados
+                </span>
+                {importResult.errors.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-coral">
+                    {importResult.errors.slice(0, 4).map((item) => (
+                      <li key={`${item.row}-${item.code ?? "sem-codigo"}`}>
+                        Linha {item.row}: {item.message}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </form>
+          <form className="mb-5 border-b border-line pb-5" onSubmit={createCriteriaSet}>
+            <h2 className="mb-3 font-semibold">Conjunto de criterios</h2>
+            <input
+              className="h-10 w-full rounded-md border border-line px-3 text-sm outline-none"
+              onChange={(event) => setSetName(event.target.value)}
+              placeholder="Nome do conjunto"
+              value={setName}
+            />
+            <Button className="mt-3 w-full" type="submit" variant="secondary">
+              Criar conjunto
+            </Button>
+          </form>
+          <form className="mb-5 border-b border-line pb-5" onSubmit={createCriterion}>
+            <h2 className="mb-3 font-semibold">Novo criterio</h2>
+            <input
+              className="mb-2 h-10 w-full rounded-md border border-line px-3 text-sm outline-none"
+              onChange={(event) => setCriterionCode(event.target.value)}
+              placeholder="Codigo"
+              value={criterionCode}
+            />
+            <input
+              className="h-10 w-full rounded-md border border-line px-3 text-sm outline-none"
+              onChange={(event) => setCriterionName(event.target.value)}
+              placeholder="Nome"
+              value={criterionName}
+            />
+            <Button className="mt-3 w-full" type="submit">
+              Salvar criterio
+            </Button>
+          </form>
           <div className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-steel" />
             <h2 className="font-semibold">Sugestao assistida</h2>
