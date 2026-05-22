@@ -23,6 +23,8 @@ class AuditRunResponse(AuditCreate):
     failed_criteria: int = 0
     started_at: datetime | None = None
     finished_at: datetime | None = None
+    queue_job_id: str | None = None
+    error_message: str | None = None
 
 
 class AuditResultResponse(BaseModel):

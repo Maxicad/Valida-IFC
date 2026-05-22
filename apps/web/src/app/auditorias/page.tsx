@@ -1,13 +1,13 @@
 "use client";
 
-import { Play, RefreshCcw } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { Loader2, Play, RefreshCcw } from "lucide-react";
 import Link from "next/link";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { apiGet, apiPost } from "@/services/api";
+import { API_BASE_URL, apiGet, apiPost } from "@/services/api";
 import type { AuditResult, AuditRun, CriteriaSet, IfcFile, Project } from "@/types/api";
 
 export default function AuditsPage() {
@@ -21,8 +21,11 @@ export default function AuditsPage() {
   const [auditResults, setAuditResults] = useState<AuditResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const summaryRows = auditResults.filter((result) => result.is_summary);
-  const elementRows = auditResults.filter((result) => !result.is_summary);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+
+  const summaryRows = useMemo(() => auditResults.filter((result) => result.is_summary), [auditResults]);
+  const elementRows = useMemo(() => auditResults.filter((result) => !result.is_summary), [auditResults]);
 
   async function loadInitialData() {
     setError(null);
@@ -63,17 +66,30 @@ export default function AuditsPage() {
       return;
     }
 
+    wsRef.current?.close();
     setLoading(true);
     setError(null);
+    setStatusMessage("Enfileirando auditoria...");
+    setAuditResults([]);
     try {
-      const createdAudit = await apiPost<AuditRun>("/audits", {
+      const createdAudit = await apiPost<AuditRun>("/audits?mode=async", {
         project_id: selectedProjectId,
         ifc_file_id: selectedIfcFileId,
         criteria_set_id: selectedCriteriaSetId,
       });
       setAuditRun(createdAudit);
-      const results = await apiGet<AuditResult[]>(`/audits/${createdAudit.id}/results`);
+      connectAuditWebSocket(createdAudit.id);
+      await waitUntilAuditFinishes(createdAudit.id);
+      const [finalAudit, results] = await Promise.all([
+        apiGet<AuditRun>(`/audits/${createdAudit.id}`),
+        apiGet<AuditResult[]>(`/audits/${createdAudit.id}/results`),
+      ]);
+      setAuditRun(finalAudit);
       setAuditResults(results);
+      setStatusMessage(finalAudit.status === "completed" ? "Auditoria concluida." : "Auditoria finalizada com falha.");
+      if (finalAudit.status === "failed") {
+        setError(finalAudit.error_message ?? "Falha ao executar auditoria.");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nao foi possivel executar auditoria.");
     } finally {
@@ -81,8 +97,34 @@ export default function AuditsPage() {
     }
   }
 
+  function connectAuditWebSocket(auditId: string) {
+    const wsUrl = API_BASE_URL.replace("http://", "ws://").replace("https://", "wss://");
+    const token = typeof window !== "undefined" ? window.localStorage.getItem("valida-ifc-token") : null;
+    const websocket = new WebSocket(`${wsUrl}/audits/${auditId}/ws${token ? `?token=${token}` : ""}`);
+    wsRef.current = websocket;
+    websocket.onmessage = (event) => {
+      const payload = JSON.parse(event.data) as { status: string; error_message?: string };
+      setStatusMessage(`Status: ${payload.status}`);
+      if (payload.status === "failed" && payload.error_message) {
+        setError(payload.error_message);
+      }
+    };
+  }
+
+  async function waitUntilAuditFinishes(auditId: string) {
+    for (let attempt = 0; attempt < 180; attempt += 1) {
+      const status = await apiGet<{ status: string; error_message?: string }>(`/audits/${auditId}/status`);
+      if (status.status === "completed" || status.status === "failed") {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+    throw new Error("Timeout aguardando processamento da auditoria.");
+  }
+
   useEffect(() => {
     void loadInitialData();
+    return () => wsRef.current?.close();
   }, []);
 
   useEffect(() => {
@@ -92,7 +134,9 @@ export default function AuditsPage() {
   return (
     <AppShell>
       <h1 className="mb-2 text-2xl font-semibold">Auditorias</h1>
-      <p className="mb-6 text-sm text-ink/65">Selecione arquivo IFC, conjunto de criterios e execute a validacao.</p>
+      <p className="mb-6 text-sm text-ink/65">
+        Selecione arquivo IFC, conjunto de criterios e execute a validacao assicrona pela fila.
+      </p>
 
       <section className="grid gap-4 lg:grid-cols-[420px_1fr]">
         <Card>
@@ -145,10 +189,16 @@ export default function AuditsPage() {
                 ))}
               </select>
             </label>
+            {statusMessage && (
+              <p className="mt-4 rounded-md bg-surface px-3 py-2 text-sm text-ink/80">
+                {loading ? <Loader2 className="mr-2 inline h-4 w-4 animate-spin" /> : null}
+                {statusMessage}
+              </p>
+            )}
             {error && <p className="mt-4 rounded-md bg-coral/10 px-3 py-2 text-sm text-coral">{error}</p>}
             <Button className="mt-5 w-full" disabled={loading} type="submit">
               <Play className="h-4 w-4" />
-              {loading ? "Executando..." : "Executar auditoria"}
+              {loading ? "Processando..." : "Executar auditoria"}
             </Button>
           </form>
         </Card>
@@ -178,13 +228,33 @@ export default function AuditsPage() {
           </div>
 
           {selectedIfcFileId && (
-            <div className="mt-5 flex justify-end">
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
               <Link
                 href={`/visualizador?ifc_file_id=${selectedIfcFileId}`}
                 className="rounded-md border border-line px-3 py-2 text-sm hover:bg-surface"
               >
                 Abrir no visualizador
               </Link>
+              {auditRun && (
+                <>
+                  <a
+                    className="rounded-md border border-line px-3 py-2 text-sm hover:bg-surface"
+                    href={`${API_BASE_URL}/audits/${auditRun.id}/report/html`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Relatorio HTML
+                  </a>
+                  <a
+                    className="rounded-md border border-line px-3 py-2 text-sm hover:bg-surface"
+                    href={`${API_BASE_URL}/audits/${auditRun.id}/report/pdf`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Relatorio PDF
+                  </a>
+                </>
+              )}
             </div>
           )}
 

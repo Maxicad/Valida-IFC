@@ -1,86 +1,65 @@
-from datetime import datetime
-from pathlib import Path
+from asyncio import sleep
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.audits.engine import EvaluatedCriterion, evaluate_criteria
+from app.audits.jobs import process_audit_run
 from app.audits.schemas import AuditCreate, AuditResultResponse, AuditRunResponse
+from app.audits.service import create_pending_audit_run, execute_audit_run, validate_audit_payload
 from app.auth.dependencies import get_current_user
-from app.core.database import get_db
-from app.core.models import AuditResult, AuditRun, CriteriaSet, Criterion, IfcFile, Project, User
-from rules_engine.scoring import calculate_score
+from app.core.database import SessionLocal, get_db
+from app.core.queue import get_audit_queue
+from app.core.models import AuditResult, AuditRun, Criterion, User
 
-router = APIRouter(prefix="/audits", tags=["audits"], dependencies=[Depends(get_current_user)])
+router = APIRouter(prefix="/audits", tags=["audits"])
 
 
 @router.post("", response_model=AuditRunResponse, status_code=status.HTTP_201_CREATED)
 def create_audit(
     payload: AuditCreate,
+    mode: str = Query(default="async", pattern="^(async|sync)$"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> AuditRun:
-    project = db.get(Project, payload.project_id)
-    if project is None:
-        raise HTTPException(status_code=404, detail="Project not found.")
-
-    ifc_file = db.get(IfcFile, payload.ifc_file_id)
-    if ifc_file is None or ifc_file.project_id != payload.project_id:
-        raise HTTPException(status_code=404, detail="IFC file not found for project.")
-
-    if not Path(ifc_file.file_path).exists():
-        raise HTTPException(status_code=404, detail="Stored IFC file not found.")
-
-    criteria_set = db.get(CriteriaSet, payload.criteria_set_id)
-    if criteria_set is None:
-        raise HTTPException(status_code=404, detail="Criteria set not found.")
-
-    criteria = list(
-        db.scalars(
-            select(Criterion)
-            .where(Criterion.criteria_set_id == payload.criteria_set_id, Criterion.active.is_(True))
-            .order_by(Criterion.created_at.asc())
-        )
-    )
-    if not criteria:
-        raise HTTPException(status_code=400, detail="Criteria set has no active criteria.")
-
-    started_at = datetime.utcnow()
-    evaluated_bundle = evaluate_criteria(ifc_file, criteria)
-    score = calculate_score(
-        [{"severity": item.severity, "status": item.status} for item in evaluated_bundle.summary_results]
-    )
-
-    audit_run = AuditRun(
+    _, ifc_file, _, criteria = validate_audit_payload(
+        db=db,
         project_id=payload.project_id,
         ifc_file_id=payload.ifc_file_id,
         criteria_set_id=payload.criteria_set_id,
-        status="completed",
-        score_percent=score.score_percent,
-        score_low=score.by_severity.get("baixa"),
-        score_moderate=score.by_severity.get("moderada"),
-        score_high=score.by_severity.get("alta"),
-        total_criteria=score.total_criteria,
-        approved_criteria=score.approved_criteria,
-        failed_criteria=score.failed_criteria,
-        started_at=started_at,
-        finished_at=datetime.utcnow(),
+    )
+
+    audit_run = create_pending_audit_run(
+        db=db,
+        project_id=payload.project_id,
+        ifc_file_id=payload.ifc_file_id,
+        criteria_set_id=payload.criteria_set_id,
         created_by=current_user.id,
     )
-    db.add(audit_run)
-    db.flush()
 
-    for evaluated in evaluated_bundle.detailed_results:
-        db.add(to_audit_result(audit_run.id, evaluated))
+    if mode == "sync":
+        execute_audit_run(db, audit_run, ifc_file, criteria)
+        db.commit()
+        db.refresh(audit_run)
+        return audit_run
 
+    try:
+        queue = get_audit_queue()
+        job = queue.enqueue(process_audit_run, audit_run.id, job_timeout=600, result_ttl=3600)
+        audit_run.queue_job_id = job.id
+    except Exception:
+        execute_audit_run(db, audit_run, ifc_file, criteria)
     db.commit()
     db.refresh(audit_run)
     return audit_run
 
 
 @router.get("/{audit_id}", response_model=AuditRunResponse)
-def get_audit(audit_id: str, db: Session = Depends(get_db)) -> AuditRun:
+def get_audit(
+    audit_id: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> AuditRun:
     audit_run = db.get(AuditRun, audit_id)
     if audit_run is None:
         raise HTTPException(status_code=404, detail="Audit not found.")
@@ -88,15 +67,28 @@ def get_audit(audit_id: str, db: Session = Depends(get_db)) -> AuditRun:
 
 
 @router.get("/{audit_id}/status")
-def get_audit_status(audit_id: str, db: Session = Depends(get_db)) -> dict[str, str]:
+def get_audit_status(
+    audit_id: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> dict[str, str]:
     audit_run = db.get(AuditRun, audit_id)
     if audit_run is None:
         raise HTTPException(status_code=404, detail="Audit not found.")
-    return {"id": audit_id, "status": audit_run.status}
+    return {
+        "id": audit_id,
+        "status": audit_run.status,
+        "queue_job_id": audit_run.queue_job_id or "",
+        "error_message": audit_run.error_message or "",
+    }
 
 
 @router.get("/{audit_id}/summary")
-def get_audit_summary(audit_id: str, db: Session = Depends(get_db)) -> dict:
+def get_audit_summary(
+    audit_id: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> dict:
     audit_run = db.get(AuditRun, audit_id)
     if audit_run is None:
         raise HTTPException(status_code=404, detail="Audit not found.")
@@ -110,11 +102,17 @@ def get_audit_summary(audit_id: str, db: Session = Depends(get_db)) -> dict:
         "approved_criteria": audit_run.approved_criteria,
         "failed_criteria": audit_run.failed_criteria,
         "status": audit_run.status,
+        "queue_job_id": audit_run.queue_job_id,
+        "error_message": audit_run.error_message,
     }
 
 
 @router.get("/{audit_id}/results", response_model=list[AuditResultResponse])
-def get_audit_results(audit_id: str, db: Session = Depends(get_db)) -> list[AuditResultResponse]:
+def get_audit_results(
+    audit_id: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> list[AuditResultResponse]:
     audit_run = db.get(AuditRun, audit_id)
     if audit_run is None:
         raise HTTPException(status_code=404, detail="Audit not found.")
@@ -147,20 +145,36 @@ def get_audit_results(audit_id: str, db: Session = Depends(get_db)) -> list[Audi
     ]
 
 
-def to_audit_result(audit_run_id: str, evaluated: EvaluatedCriterion) -> AuditResult:
-    return AuditResult(
-        audit_run_id=audit_run_id,
-        criteria_id=evaluated.criteria_id,
-        element_guid=evaluated.element_guid,
-        element_type=evaluated.element_type,
-        element_name=evaluated.element_name,
-        status=evaluated.status,
-        severity=evaluated.severity,
-        message=evaluated.message,
-        actual_value=evaluated.actual_value,
-        expected_value=evaluated.expected_value,
-        weight=evaluated.weight,
-        score_value=evaluated.score_value,
-        fix_suggestion=evaluated.fix_suggestion,
-        is_summary=evaluated.is_summary,
-    )
+@router.websocket("/{audit_id}/ws")
+async def audit_status_websocket(websocket: WebSocket, audit_id: str) -> None:
+    await websocket.accept()
+    try:
+        while True:
+            db = SessionLocal()
+            try:
+                audit_run = db.get(AuditRun, audit_id)
+            finally:
+                db.close()
+            if audit_run is None:
+                await websocket.send_json({"id": audit_id, "status": "not_found"})
+                await websocket.close(code=1008)
+                return
+
+            await websocket.send_json(
+                {
+                    "id": audit_id,
+                    "status": audit_run.status,
+                    "score_percent": audit_run.score_percent,
+                    "approved_criteria": audit_run.approved_criteria,
+                    "failed_criteria": audit_run.failed_criteria,
+                    "error_message": audit_run.error_message,
+                }
+            )
+
+            if audit_run.status in {"completed", "failed"}:
+                await websocket.close(code=1000)
+                return
+
+            await sleep(1)
+    except WebSocketDisconnect:
+        return

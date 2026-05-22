@@ -106,6 +106,8 @@ class AuditRun(Base):
     started_at: Mapped[datetime | None] = mapped_column(DateTime)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime)
     created_by: Mapped[str | None] = mapped_column(String, ForeignKey("users.id"), nullable=True)
+    queue_job_id: Mapped[str | None] = mapped_column(String(80))
+    error_message: Mapped[str | None] = mapped_column(Text)
 
 
 class AuditResult(Base):

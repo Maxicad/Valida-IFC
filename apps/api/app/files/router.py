@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from re import sub
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from sqlalchemy import select
+from fastapi.responses import FileResponse
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.audits.ifc_adapter import IfcAuditContext
@@ -12,7 +13,14 @@ from app.auth.dependencies import get_current_user
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.models import AuditResult, AuditRun, Criterion, IfcFile, Project, User
-from app.files.schemas import IfcFileResponse, IfcMetadataResponse, ViewerDataResponse, ViewerElementResponse
+from app.files.schemas import (
+    IfcFileResponse,
+    IfcMetadataResponse,
+    ViewerDataResponse,
+    ViewerElementResponse,
+    ViewerGeometryElementResponse,
+    ViewerGeometryResponse,
+)
 from ifc_utils.ifc_metadata import build_metadata_from_header
 from ifc_utils.ifc_reader import read_ifc_schema_from_bytes
 
@@ -42,9 +50,14 @@ async def upload_ifc(
     if not file.filename or not file.filename.lower().endswith(".ifc"):
         raise HTTPException(status_code=400, detail="Only .ifc files are accepted.")
 
+    enforce_upload_limits(db=db, project_id=project_id, user_id=current_user.id)
+    cleanup_expired_project_files(db=db, project_id=project_id)
+
     content = await file.read(settings.upload_max_bytes + 1)
     if len(content) > settings.upload_max_bytes:
         raise HTTPException(status_code=413, detail="IFC file is larger than the configured limit.")
+
+    validate_ifc_content(content)
 
     schema = read_ifc_schema_from_bytes(content)
     metadata = build_metadata_from_header(content)
@@ -104,6 +117,23 @@ def get_ifc_metadata(ifc_file_id: str, db: Session = Depends(get_db)) -> IfcMeta
         ifc_schema=ifc_file.ifc_schema,
         ifc_version=ifc_file.ifc_version,
         metadata=ifc_file.metadata_json or {},
+    )
+
+
+@router.get("/ifc-files/{ifc_file_id}/download")
+def download_ifc_file(ifc_file_id: str, db: Session = Depends(get_db)) -> FileResponse:
+    ifc_file = db.get(IfcFile, ifc_file_id)
+    if ifc_file is None:
+        raise HTTPException(status_code=404, detail="IFC file not found.")
+
+    stored_path = Path(ifc_file.file_path)
+    if not stored_path.exists():
+        raise HTTPException(status_code=404, detail="Stored IFC file not found.")
+
+    return FileResponse(
+        path=stored_path,
+        filename=ifc_file.file_name,
+        media_type="application/octet-stream",
     )
 
 
@@ -175,6 +205,27 @@ def get_viewer_data(ifc_file_id: str, db: Session = Depends(get_db)) -> ViewerDa
     )
 
 
+@router.get("/ifc-files/{ifc_file_id}/viewer-geometry", response_model=ViewerGeometryResponse)
+def get_viewer_geometry(ifc_file_id: str, db: Session = Depends(get_db)) -> ViewerGeometryResponse:
+    ifc_file = db.get(IfcFile, ifc_file_id)
+    if ifc_file is None:
+        raise HTTPException(status_code=404, detail="IFC file not found.")
+
+    if not Path(ifc_file.file_path).exists():
+        raise HTTPException(status_code=404, detail="Stored IFC file not found.")
+
+    context = IfcAuditContext(ifc_file.file_path, schema_hint=ifc_file.ifc_schema)
+    raw_elements = context.extract_geometry(
+        max_elements=settings.viewer_geometry_max_elements,
+        max_triangles_per_element=settings.viewer_geometry_max_triangles_per_element,
+    )
+
+    return ViewerGeometryResponse(
+        ifc_file_id=ifc_file_id,
+        elements=[ViewerGeometryElementResponse(**row) for row in raw_elements],
+    )
+
+
 @router.delete("/ifc-files/{ifc_file_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_ifc_file(ifc_file_id: str, db: Session = Depends(get_db)) -> None:
     ifc_file = db.get(IfcFile, ifc_file_id)
@@ -196,3 +247,57 @@ def _max_severity(current: str | None, incoming: str | None) -> str | None:
     if current is None:
         return incoming
     return incoming if order.get(incoming, 0) >= order.get(current, 0) else current
+
+
+def enforce_upload_limits(db: Session, project_id: str, user_id: str | None) -> None:
+    total_files = db.scalar(select(func.count(IfcFile.id)).where(IfcFile.project_id == project_id)) or 0
+    if total_files >= settings.upload_max_files_per_project:
+        raise HTTPException(
+            status_code=429,
+            detail="Project reached maximum number of IFC files. Delete old files before uploading new ones.",
+        )
+
+    if user_id:
+        user_files = (
+            db.scalar(
+                select(func.count(IfcFile.id)).where(
+                    IfcFile.project_id == project_id,
+                    IfcFile.uploaded_by == user_id,
+                )
+            )
+            or 0
+        )
+        if user_files >= settings.upload_max_files_per_user_per_project:
+            raise HTTPException(
+                status_code=429,
+                detail="User reached upload limit for this project.",
+            )
+
+
+def cleanup_expired_project_files(db: Session, project_id: str) -> None:
+    if settings.storage_retention_days <= 0:
+        return
+
+    cutoff = datetime.utcnow() - timedelta(days=settings.storage_retention_days)
+    old_files = list(
+        db.scalars(
+            select(IfcFile).where(IfcFile.project_id == project_id, IfcFile.uploaded_at < cutoff)
+        )
+    )
+    if not old_files:
+        return
+
+    for item in old_files:
+        stored_path = Path(item.file_path)
+        if stored_path.exists() and stored_path.is_file():
+            stored_path.unlink()
+        db.delete(item)
+    db.flush()
+
+
+def validate_ifc_content(content: bytes) -> None:
+    header = content[:2048].decode("utf-8", errors="ignore").upper()
+    if "ISO-10303-21" not in header:
+        raise HTTPException(status_code=422, detail="Malformed IFC: missing ISO-10303-21 signature.")
+    if "FILE_SCHEMA" not in header:
+        raise HTTPException(status_code=422, detail="Malformed IFC: FILE_SCHEMA not found in IFC header.")

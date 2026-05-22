@@ -66,6 +66,8 @@ ALLOWED_OPERATORS = {
     "exists",
     "min",
     ">=",
+    "max",
+    "<=",
 }
 
 
@@ -194,12 +196,30 @@ def validate_rule_metadata(row: dict[str, Any]) -> None:
     if operator not in ALLOWED_OPERATORS:
         raise CriteriaImportValidationError(f"Operador nao suportado: {operator}.")
 
-    if row["rule_type"] in {"entity_exists", "entity_count_min", "property_exists", "property_not_empty"}:
+    if row["rule_type"] in {
+        "entity_exists",
+        "entity_count_min",
+        "property_exists",
+        "property_not_empty",
+        "property_value_equals",
+        "property_value_in_list",
+        "geometry_exists",
+    }:
         if not row.get("entity_ifc"):
             raise CriteriaImportValidationError("Regra exige entidade_ifc.")
 
-    if row["rule_type"] in {"property_exists", "property_not_empty"} and not row.get("property_name"):
+    if row["rule_type"] in {
+        "property_exists",
+        "property_not_empty",
+        "property_value_equals",
+        "property_value_in_list",
+    } and not row.get("property_name"):
         raise CriteriaImportValidationError("Regra exige propriedade.")
 
-    if row["rule_type"] in {"ifc_schema", "entity_count_min"} and not row.get("expected_value"):
+    if row["rule_type"] in {
+        "ifc_schema",
+        "entity_count_min",
+        "property_value_equals",
+        "property_value_in_list",
+    } and not row.get("expected_value"):
         raise CriteriaImportValidationError("Regra exige valor_esperado.")

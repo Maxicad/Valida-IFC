@@ -93,6 +93,8 @@ export interface AuditRun {
   failed_criteria: number;
   started_at?: string | null;
   finished_at?: string | null;
+  queue_job_id?: string | null;
+  error_message?: string | null;
 }
 
 export interface AuditResult {
@@ -126,4 +128,18 @@ export interface ViewerData {
   audit_run_id?: string | null;
   elements: ViewerElement[];
   status_map: Record<string, "approved" | "failed" | "unknown">;
+}
+
+export interface ViewerGeometryElement {
+  global_id: string;
+  entity: string;
+  name?: string | null;
+  express_id?: number | null;
+  vertices: number[];
+  indices: number[];
+}
+
+export interface ViewerGeometry {
+  ifc_file_id: string;
+  elements: ViewerGeometryElement[];
 }

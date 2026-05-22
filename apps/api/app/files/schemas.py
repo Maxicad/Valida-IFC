@@ -37,3 +37,17 @@ class ViewerDataResponse(BaseModel):
     audit_run_id: str | None = None
     elements: list[ViewerElementResponse]
     status_map: dict[str, str]
+
+
+class ViewerGeometryElementResponse(BaseModel):
+    global_id: str
+    entity: str
+    name: str | None = None
+    express_id: int | None = None
+    vertices: list[float]
+    indices: list[int]
+
+
+class ViewerGeometryResponse(BaseModel):
+    ifc_file_id: str
+    elements: list[ViewerGeometryElementResponse]

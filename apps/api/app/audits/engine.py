@@ -57,6 +57,16 @@ def evaluate_criterion(context: IfcAuditContext, criterion: Criterion) -> list[E
         return evaluate_property(context, criterion, require_value=True)
     if rule_type == "globalid_unique":
         return evaluate_globalid_unique(context, criterion)
+    if rule_type == "property_value_equals":
+        return evaluate_property_value(context, criterion, mode="equals")
+    if rule_type == "property_value_in_list":
+        return evaluate_property_value(context, criterion, mode="in")
+    if rule_type == "classification_exists":
+        return evaluate_classification_exists(context, criterion)
+    if rule_type == "spatial_structure_check":
+        return evaluate_spatial_structure(context, criterion)
+    if rule_type == "geometry_exists":
+        return evaluate_geometry_exists(context, criterion)
 
     return [
         summary_result(
@@ -208,6 +218,165 @@ def evaluate_globalid_unique(context: IfcAuditContext, criterion: Criterion) -> 
     return results
 
 
+def evaluate_property_value(
+    context: IfcAuditContext,
+    criterion: Criterion,
+    mode: str,
+) -> list[EvaluatedCriterion]:
+    instances = context.list_elements(criterion.entity_ifc)
+    if not instances:
+        return [
+            summary_result(
+                criterion=criterion,
+                status="failed",
+                message=f"Nenhuma instancia de {criterion.entity_ifc} encontrada.",
+                actual_value="0",
+                expected_value=str(criterion.expected_value or ""),
+            )
+        ]
+
+    expected_values = split_expected_values(criterion.expected_value)
+    operator = (criterion.operator or mode or "").strip().lower()
+    if operator in {"=", "eq"}:
+        operator = "equals"
+
+    detailed: list[EvaluatedCriterion] = []
+    approved_count = 0
+    failed_count = 0
+
+    for element in instances:
+        actual = context.get_property_value(element, criterion.property_name)
+        approved = compare_value(actual, expected_values, operator)
+        if approved:
+            approved_count += 1
+        else:
+            failed_count += 1
+
+        detailed.append(
+            detailed_result(
+                criterion=criterion,
+                status="approved" if approved else "failed",
+                message=criterion.failure_message if (not approved and criterion.failure_message) else build_compare_message(
+                    criterion.property_name,
+                    operator,
+                    actual,
+                    expected_values,
+                    approved,
+                ),
+                actual_value=actual,
+                expected_value="|".join(expected_values),
+                element=element,
+            )
+        )
+
+    detailed.insert(
+        0,
+        summary_result(
+            criterion=criterion,
+            status="approved" if failed_count == 0 else "failed",
+            message=f"Comparacao {operator} valida em {approved_count}/{len(instances)} instancias.",
+            actual_value=f"{approved_count}/{len(instances)}",
+            expected_value="|".join(expected_values),
+        ),
+    )
+    return detailed
+
+
+def evaluate_classification_exists(context: IfcAuditContext, criterion: Criterion) -> list[EvaluatedCriterion]:
+    rel_count = context.count_entities("IfcRelAssociatesClassification")
+    if rel_count == 0:
+        return [
+            summary_result(
+                criterion=criterion,
+                status="failed",
+                message=criterion.failure_message or "Nenhuma classificacao IFC encontrada no modelo.",
+                actual_value="0",
+                expected_value=">0",
+            )
+        ]
+    return [
+        summary_result(
+            criterion=criterion,
+            status="approved",
+            message=f"Classificacoes detectadas: {rel_count}.",
+            actual_value=str(rel_count),
+            expected_value=">0",
+        )
+    ]
+
+
+def evaluate_spatial_structure(context: IfcAuditContext, criterion: Criterion) -> list[EvaluatedCriterion]:
+    checks = {
+        "IfcProject": context.count_entities("IfcProject"),
+        "IfcSite": context.count_entities("IfcSite"),
+        "IfcBuilding": context.count_entities("IfcBuilding"),
+        "IfcBuildingStorey": context.count_entities("IfcBuildingStorey"),
+        "IfcRelContainedInSpatialStructure": context.count_entities("IfcRelContainedInSpatialStructure"),
+    }
+    missing = [name for name, count in checks.items() if count == 0]
+    approved = not missing
+    return [
+        summary_result(
+            criterion=criterion,
+            status="approved" if approved else "failed",
+            message=(
+                "Estrutura espacial valida."
+                if approved
+                else f"Estrutura espacial incompleta. Ausente: {', '.join(missing)}."
+            ),
+            actual_value="; ".join(f"{key}={value}" for key, value in checks.items()),
+            expected_value="todos presentes",
+        )
+    ]
+
+
+def evaluate_geometry_exists(context: IfcAuditContext, criterion: Criterion) -> list[EvaluatedCriterion]:
+    instances = context.list_elements(criterion.entity_ifc or "IfcProduct")
+    if not instances:
+        return [
+            summary_result(
+                criterion=criterion,
+                status="failed",
+                message=f"Nenhuma instancia de {criterion.entity_ifc or 'IfcProduct'} encontrada.",
+                actual_value="0",
+                expected_value=">0",
+            )
+        ]
+
+    detailed: list[EvaluatedCriterion] = []
+    approved_count = 0
+    for element in instances:
+        has_geometry = context.has_geometry(element)
+        if has_geometry:
+            approved_count += 1
+        detailed.append(
+            detailed_result(
+                criterion=criterion,
+                status="approved" if has_geometry else "failed",
+                message=(
+                    "Geometria encontrada."
+                    if has_geometry
+                    else criterion.failure_message or "Elemento sem geometria renderizavel."
+                ),
+                actual_value="1" if has_geometry else "0",
+                expected_value="1",
+                element=element,
+            )
+        )
+
+    detailed.insert(
+        0,
+        summary_result(
+            criterion=criterion,
+            status="approved" if approved_count == len(instances) else "failed",
+            message=f"Geometria valida em {approved_count}/{len(instances)} elementos.",
+            actual_value=f"{approved_count}/{len(instances)}",
+            expected_value="todos com geometria",
+        ),
+    )
+    return detailed
+
+
 def summary_result(
     criterion: Criterion,
     status: str,
@@ -274,3 +443,43 @@ def _property_result_message(
     if approved:
         return f"{property_name} valido ({value})."
     return f"{property_name} ausente ou vazio."
+
+
+def compare_value(actual_value: str | None, expected_values: list[str], operator: str) -> bool:
+    normalized_actual = (actual_value or "").strip()
+    if operator == "equals":
+        if not expected_values:
+            return False
+        return normalized_actual.lower() == expected_values[0].strip().lower()
+    if operator == "in":
+        normalized_options = {item.strip().lower() for item in expected_values}
+        return normalized_actual.lower() in normalized_options
+    if operator in {"min", ">="}:
+        try:
+            if not expected_values:
+                return False
+            return float(normalized_actual) >= float(expected_values[0])
+        except ValueError:
+            return False
+    if operator in {"max", "<="}:
+        try:
+            if not expected_values:
+                return False
+            return float(normalized_actual) <= float(expected_values[0])
+        except ValueError:
+            return False
+    return False
+
+
+def build_compare_message(
+    property_name: str | None,
+    operator: str,
+    actual_value: str | None,
+    expected_values: list[str],
+    approved: bool,
+) -> str:
+    state = "aprovado" if approved else "reprovado"
+    return (
+        f"Comparacao {state}: {property_name} {operator} {','.join(expected_values)} "
+        f"(atual={actual_value or 'vazio'})."
+    )

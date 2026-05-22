@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.auth.router import router as auth_router
 from app.audits.router import router as audits_router
 from app.core.config import settings
+from app.core.logging import request_logging_middleware
 from app.criteria.router import router as criteria_router
 from app.files.router import router as files_router
 from app.projects.router import router as projects_router
@@ -25,6 +26,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    api.middleware("http")(request_logging_middleware)
 
     @api.get("/health", tags=["health"])
     def health() -> dict[str, str]:

@@ -9,10 +9,14 @@ from ifc_utils.ifc_reader import read_ifc_schema_from_text
 
 try:  # pragma: no cover - optional runtime dependency
     import ifcopenshell  # type: ignore
+    import ifcopenshell.geom  # type: ignore
     import ifcopenshell.util.element as ifc_element_utils  # type: ignore
 except Exception:  # pragma: no cover - fallback path when IfcOpenShell is unavailable
     ifcopenshell = None
+    ifcopenshell_geom = None
     ifc_element_utils = None
+else:
+    ifcopenshell_geom = ifcopenshell.geom
 
 
 @dataclass(frozen=True)
@@ -22,6 +26,7 @@ class IfcElementRef:
     name: str | None
     raw: Any
     fallback_args: list[str] | None = None
+    express_id: int | None = None
 
 
 class IfcAuditContext:
@@ -31,6 +36,7 @@ class IfcAuditContext:
         self.schema = schema_hint or read_ifc_schema_from_text(self._text)
         self._ifc_model = self._open_ifc_model(file_path)
         self._cache: dict[str, list[IfcElementRef]] = {}
+        self._geom_settings = self._build_geom_settings()
 
     @property
     def has_ifcopenshell(self) -> bool:
@@ -73,6 +79,62 @@ class IfcAuditContext:
             return None
         return normalize_ifc_value(element.fallback_args[index])
 
+    def get_ifc_type(self, element: IfcElementRef) -> str:
+        if self._ifc_model is not None and element.raw is not None:
+            try:
+                return element.raw.is_a()
+            except Exception:
+                return element.entity
+        return element.entity
+
+    def extract_geometry(self, max_elements: int, max_triangles_per_element: int) -> list[dict[str, Any]]:
+        if self._ifc_model is None or ifcopenshell_geom is None or self._geom_settings is None:
+            return []
+
+        payload: list[dict[str, Any]] = []
+        count = 0
+        for element in self.list_elements("IfcProduct"):
+            if not element.raw or not element.guid:
+                continue
+            if count >= max_elements:
+                break
+            try:
+                shape = ifcopenshell_geom.create_shape(self._geom_settings, element.raw)
+                vertices = list(shape.geometry.verts)
+                indices = list(shape.geometry.faces)
+            except Exception:
+                continue
+
+            triangle_count = len(indices) // 3
+            if not indices or triangle_count == 0:
+                continue
+            if triangle_count > max_triangles_per_element:
+                continue
+
+            payload.append(
+                {
+                    "global_id": element.guid,
+                    "entity": element.entity,
+                    "name": element.name,
+                    "express_id": element.express_id,
+                    "vertices": vertices,
+                    "indices": indices,
+                }
+            )
+            count += 1
+        return payload
+
+    def has_geometry(self, element: IfcElementRef) -> bool:
+        if self._ifc_model is None or ifcopenshell_geom is None or self._geom_settings is None:
+            return False
+        if not element.raw:
+            return False
+        try:
+            shape = ifcopenshell_geom.create_shape(self._geom_settings, element.raw)
+            return bool(shape.geometry.faces)
+        except Exception:
+            return False
+
     def _list_elements_with_ifcopenshell(self, entity_ifc: str | None) -> list[IfcElementRef]:
         if self._ifc_model is None:
             return []
@@ -92,6 +154,7 @@ class IfcAuditContext:
                     entity=entity.is_a(),
                     name=name or None,
                     raw=entity,
+                    express_id=getattr(entity, "id", lambda: None)(),
                 )
             )
         return rows
@@ -137,6 +200,17 @@ class IfcAuditContext:
             return None
         try:
             return ifcopenshell.open(file_path)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _build_geom_settings() -> Any | None:
+        if ifcopenshell_geom is None:
+            return None
+        try:
+            settings = ifcopenshell_geom.settings()
+            settings.set(settings.USE_WORLD_COORDS, True)
+            return settings
         except Exception:
             return None
 

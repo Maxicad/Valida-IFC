@@ -138,6 +138,25 @@ def test_upload_ifc_saves_file_and_metadata(client: TestClient) -> None:
     assert list_response.json()[0]["file_name"] == "modelo.ifc"
 
 
+def test_upload_rejects_malformed_ifc(client: TestClient) -> None:
+    headers = auth_headers(client)
+    project_id = client.post(
+        "/projects",
+        json={"name": "Hospital Central", "client": "Cliente Demo"},
+        headers=headers,
+    ).json()["id"]
+
+    bad_content = b"NOT-IFC\nHEADER;\nFILE_SCHEMA(('IFC4'));"
+    response = client.post(
+        f"/projects/{project_id}/ifc/upload",
+        files={"file": ("ruim.ifc", bad_content, "application/octet-stream")},
+        headers=headers,
+    )
+
+    assert response.status_code == 422
+    assert "Malformed IFC" in response.json()["detail"]
+
+
 def test_import_criteria_and_run_audit(client: TestClient) -> None:
     headers = auth_headers(client)
     project_response = client.post(
@@ -173,7 +192,7 @@ def test_import_criteria_and_run_audit(client: TestClient) -> None:
     criteria_set_id = import_response.json()["criteria_set"]["id"]
 
     audit_response = client.post(
-        "/audits",
+        "/audits?mode=sync",
         json={
             "project_id": project_id,
             "ifc_file_id": ifc_file_id,
@@ -219,7 +238,7 @@ def test_audit_persists_element_results_and_viewer_data(client: TestClient) -> N
     ).json()["criteria_set"]["id"]
 
     audit_response = client.post(
-        "/audits",
+        "/audits?mode=sync",
         json={
             "project_id": project_id,
             "ifc_file_id": ifc_file_id,
@@ -245,3 +264,15 @@ def test_audit_persists_element_results_and_viewer_data(client: TestClient) -> N
     assert viewer_data["audit_run_id"] == audit_id
     assert viewer_data["status_map"]["WALL_FAIL"] == "failed"
     assert any(item["global_id"] == "WALL_FAIL" for item in viewer_data["elements"])
+
+    geometry_response = client.get(f"/ifc-files/{ifc_file_id}/viewer-geometry", headers=headers)
+    assert geometry_response.status_code == 200
+    assert geometry_response.json()["ifc_file_id"] == ifc_file_id
+
+    report_html = client.get(f"/audits/{audit_id}/report/html")
+    assert report_html.status_code == 200
+    assert "Relatorio de Auditoria IFC" in report_html.text
+
+    report_pdf = client.get(f"/audits/{audit_id}/report/pdf")
+    assert report_pdf.status_code == 200
+    assert report_pdf.headers["content-type"] == "application/pdf"
