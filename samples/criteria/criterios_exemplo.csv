@@ -1,0 +1,4 @@
+codigo,nome,descricao,categoria,criticidade,tipo_regra,entidade_ifc,propriedade,operador,valor_esperado,mensagem_reprovacao,sugestao_correcao,referencia,ativo
+IFC-001,Versao minima IFC,O arquivo deve estar em IFC4 ou IFC4X3,Metadados,alta,ifc_schema,,FILE_SCHEMA,in,IFC4|IFC4X3,O arquivo IFC nao esta na versao minima exigida,Exportar novamente em IFC4 ou IFC4X3,openBIM,sim
+IFC-002,Ambientes com nome,Todos os ambientes devem possuir nome preenchido,Espacos,moderada,property_not_empty,IfcSpace,Name,not_empty,,Ambiente sem nome preenchido,Preencher o nome do ambiente no software autoral,Requisito BIM,sim
+IFC-003,Portas com identificacao,Todas as portas devem possuir Tag preenchida,Elementos,alta,property_not_empty,IfcDoor,Tag,not_empty,,Porta sem codigo de identificacao,Preencher o parametro Tag da porta,Requisito BIM,sim

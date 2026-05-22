@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.next/
+dist/
+build/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Env and local data
+.env
+.env.local
+*.sqlite3
+
+# Generated and uploaded files
+infra/storage/*
+!infra/storage/.gitkeep
+samples/ifc/*.ifc
+!samples/ifc/.gitkeep
+samples/reports/*
+!samples/reports/.gitkeep
+apps/api/storage/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

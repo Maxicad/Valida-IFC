@@ -1,0 +1,3 @@
+IFC-001 | Versao minima IFC | alta | ifc_schema | FILE_SCHEMA in IFC4|IFC4X3
+IFC-002 | Ambientes com nome | moderada | property_not_empty | IfcSpace.Name not_empty
+IFC-003 | Portas com identificacao | alta | property_not_empty | IfcDoor.Tag not_empty
