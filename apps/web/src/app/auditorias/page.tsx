@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Play, RefreshCcw } from "lucide-react";
+import { CheckCircle2, FileText, Loader2, Play, RefreshCcw, XCircle } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
@@ -9,6 +9,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { API_BASE_URL, apiGet, apiPost } from "@/services/api";
 import type { AuditResult, AuditRun, CriteriaSet, IfcFile, Project } from "@/types/api";
+
+function statusTone(status: string): string {
+  if (status === "completed") {
+    return "bg-moss/10 text-moss";
+  }
+  if (status === "failed") {
+    return "bg-coral/10 text-coral";
+  }
+  if (status === "running") {
+    return "bg-amber/10 text-amber";
+  }
+  return "bg-steel/10 text-steel";
+}
 
 export default function AuditsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -21,6 +34,7 @@ export default function AuditsPage() {
   const [auditResults, setAuditResults] = useState<AuditResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -28,6 +42,7 @@ export default function AuditsPage() {
   const elementRows = useMemo(() => auditResults.filter((result) => !result.is_summary), [auditResults]);
 
   async function loadInitialData() {
+    setLoadingData(true);
     setError(null);
     try {
       const [loadedProjects, loadedCriteriaSets] = await Promise.all([
@@ -40,6 +55,8 @@ export default function AuditsPage() {
       setSelectedCriteriaSetId((current) => current || loadedCriteriaSets[0]?.id || "");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nao foi possivel carregar dados de auditoria.");
+    } finally {
+      setLoadingData(false);
     }
   }
 
@@ -71,6 +88,7 @@ export default function AuditsPage() {
     setError(null);
     setStatusMessage("Enfileirando auditoria...");
     setAuditResults([]);
+
     try {
       const createdAudit = await apiPost<AuditRun>("/audits?mode=async", {
         project_id: selectedProjectId,
@@ -79,6 +97,7 @@ export default function AuditsPage() {
       });
       setAuditRun(createdAudit);
       connectAuditWebSocket(createdAudit.id);
+
       await waitUntilAuditFinishes(createdAudit.id);
       const [finalAudit, results] = await Promise.all([
         apiGet<AuditRun>(`/audits/${createdAudit.id}`),
@@ -133,18 +152,34 @@ export default function AuditsPage() {
 
   return (
     <AppShell>
-      <h1 className="mb-2 text-2xl font-semibold">Auditorias</h1>
-      <p className="mb-6 text-sm text-ink/65">
-        Selecione arquivo IFC, conjunto de criterios e execute a validacao assicrona pela fila.
-      </p>
+      <section className="rounded-lg border border-line bg-panel p-5 shadow-soft md:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-steel">Execucao de Regras</p>
+            <h1 className="mt-1 text-2xl font-semibold text-ink">Auditorias IFC</h1>
+            <p className="mt-2 max-w-2xl text-sm text-ink/65">
+              Selecione um arquivo e um conjunto de criterios para processar a auditoria de forma assincrona.
+            </p>
+          </div>
+          <Button onClick={() => void loadInitialData()} type="button" variant="secondary">
+            <RefreshCcw className={`h-4 w-4 ${loadingData ? "animate-spin" : ""}`} />
+            Atualizar base
+          </Button>
+        </div>
+      </section>
 
-      <section className="grid gap-4 lg:grid-cols-[420px_1fr]">
-        <Card>
-          <form onSubmit={runAudit}>
-            <label className="block text-sm font-medium">
+      {error && <p className="mt-4 rounded-md bg-coral/10 px-3 py-2 text-sm text-coral">{error}</p>}
+
+      <section className="mt-4 grid gap-4 lg:grid-cols-[420px_1fr]">
+        <Card className="p-4 md:p-5">
+          <h2 className="text-lg font-semibold text-ink">Nova auditoria</h2>
+          <p className="mt-1 text-sm text-ink/60">Escolha o escopo antes de enviar para processamento.</p>
+
+          <form className="mt-4 space-y-4" onSubmit={runAudit}>
+            <label className="block text-sm font-medium text-ink/90">
               Projeto
               <select
-                className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3"
+                className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
                 onChange={(event) => {
                   setSelectedProjectId(event.target.value);
                   setSelectedIfcFileId("");
@@ -159,10 +194,11 @@ export default function AuditsPage() {
                 ))}
               </select>
             </label>
-            <label className="mt-4 block text-sm font-medium">
+
+            <label className="block text-sm font-medium text-ink/90">
               Arquivo IFC
               <select
-                className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3"
+                className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
                 onChange={(event) => setSelectedIfcFileId(event.target.value)}
                 value={selectedIfcFileId}
               >
@@ -174,10 +210,11 @@ export default function AuditsPage() {
                 ))}
               </select>
             </label>
-            <label className="mt-4 block text-sm font-medium">
+
+            <label className="block text-sm font-medium text-ink/90">
               Conjunto de criterios
               <select
-                className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3"
+                className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
                 onChange={(event) => setSelectedCriteriaSetId(event.target.value)}
                 value={selectedCriteriaSetId}
               >
@@ -189,67 +226,71 @@ export default function AuditsPage() {
                 ))}
               </select>
             </label>
+
             {statusMessage && (
-              <p className="mt-4 rounded-md bg-surface px-3 py-2 text-sm text-ink/80">
+              <p className="rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink/80">
                 {loading ? <Loader2 className="mr-2 inline h-4 w-4 animate-spin" /> : null}
                 {statusMessage}
               </p>
             )}
-            {error && <p className="mt-4 rounded-md bg-coral/10 px-3 py-2 text-sm text-coral">{error}</p>}
-            <Button className="mt-5 w-full" disabled={loading} type="submit">
+
+            <Button className="w-full" disabled={loading || loadingData} type="submit">
               <Play className="h-4 w-4" />
               {loading ? "Processando..." : "Executar auditoria"}
             </Button>
           </form>
         </Card>
 
-        <Card>
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Resultado resumido</h2>
-            <button onClick={() => void loadInitialData()} type="button">
-              <RefreshCcw className="h-4 w-4 text-ink/50" />
-            </button>
+        <Card className="p-4 md:p-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <h2 className="text-lg font-semibold text-ink">Resultado da ultima execucao</h2>
+            <span className={`inline-flex w-fit rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-wide ${statusTone(auditRun?.status ?? "pending")}`}>
+              {auditRun?.status ?? "pending"}
+            </span>
           </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-md bg-surface p-4">
-              <span className="text-sm text-ink/60">Percentual</span>
-              <strong className="mt-2 block text-3xl">
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <div className="rounded-md border border-line bg-surface p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink/55">Score</p>
+              <strong className="mt-2 block text-3xl font-semibold text-ink">
                 {auditRun?.score_percent != null ? `${auditRun.score_percent}%` : "-"}
               </strong>
             </div>
-            <div className="rounded-md bg-surface p-4">
-              <span className="text-sm text-ink/60">Aprovados</span>
-              <strong className="mt-2 block text-3xl">{auditRun?.approved_criteria ?? "-"}</strong>
+            <div className="rounded-md border border-line bg-surface p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink/55">Aprovados</p>
+              <strong className="mt-2 block text-3xl font-semibold text-moss">{auditRun?.approved_criteria ?? "-"}</strong>
             </div>
-            <div className="rounded-md bg-surface p-4">
-              <span className="text-sm text-ink/60">Reprovados</span>
-              <strong className="mt-2 block text-3xl">{auditRun?.failed_criteria ?? "-"}</strong>
+            <div className="rounded-md border border-line bg-surface p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink/55">Reprovados</p>
+              <strong className="mt-2 block text-3xl font-semibold text-coral">{auditRun?.failed_criteria ?? "-"}</strong>
             </div>
           </div>
 
           {selectedIfcFileId && (
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Link
+                className="inline-flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm font-medium text-ink/80 hover:bg-white"
                 href={`/visualizador?ifc_file_id=${selectedIfcFileId}`}
-                className="rounded-md border border-line px-3 py-2 text-sm hover:bg-surface"
               >
-                Abrir no visualizador
+                <FileText className="h-4 w-4 text-steel" />
+                Abrir visualizador
               </Link>
+
               {auditRun && (
                 <>
                   <a
-                    className="rounded-md border border-line px-3 py-2 text-sm hover:bg-surface"
+                    className="inline-flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm font-medium text-ink/80 hover:bg-white"
                     href={`${API_BASE_URL}/audits/${auditRun.id}/report/html`}
-                    target="_blank"
                     rel="noreferrer"
+                    target="_blank"
                   >
                     Relatorio HTML
                   </a>
                   <a
-                    className="rounded-md border border-line px-3 py-2 text-sm hover:bg-surface"
+                    className="inline-flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm font-medium text-ink/80 hover:bg-white"
                     href={`${API_BASE_URL}/audits/${auditRun.id}/report/pdf`}
-                    target="_blank"
                     rel="noreferrer"
+                    target="_blank"
                   >
                     Relatorio PDF
                   </a>
@@ -258,17 +299,19 @@ export default function AuditsPage() {
             </div>
           )}
 
-          <div className="mt-6 overflow-hidden rounded-md border border-line">
+          <h3 className="mt-6 text-sm font-semibold uppercase tracking-wide text-ink/55">Resumo por criterio</h3>
+          <div className="mt-2 overflow-hidden rounded-md border border-line">
             {summaryRows.length === 0 ? (
               <div className="px-4 py-3 text-sm text-ink/60">Nenhuma auditoria executada nesta sessao.</div>
             ) : (
               summaryRows.map((result) => (
                 <div
+                  className="grid gap-2 border-b border-line px-4 py-3 text-sm last:border-0 md:grid-cols-[90px_120px_100px_1fr]"
                   key={`${result.criteria_id}-${result.code}`}
-                  className="grid gap-3 border-b border-line px-4 py-3 text-sm last:border-0 md:grid-cols-[90px_110px_110px_1fr]"
                 >
                   <strong>{result.code}</strong>
                   <span className={result.status === "approved" ? "text-moss" : "text-coral"}>
+                    {result.status === "approved" ? <CheckCircle2 className="mr-1 inline h-4 w-4" /> : <XCircle className="mr-1 inline h-4 w-4" />}
                     {result.status}
                   </span>
                   <span className="capitalize">{result.severity}</span>
@@ -278,24 +321,18 @@ export default function AuditsPage() {
             )}
           </div>
 
-          <h3 className="mt-6 text-sm font-semibold uppercase tracking-wide text-ink/60">
-            Resultados por elemento
-          </h3>
-          <div className="mt-3 overflow-hidden rounded-md border border-line">
+          <h3 className="mt-6 text-sm font-semibold uppercase tracking-wide text-ink/55">Detalhes por elemento</h3>
+          <div className="mt-2 max-h-[340px] overflow-y-auto rounded-md border border-line">
             {elementRows.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-ink/60">
-                Nenhum detalhe por elemento para esta auditoria.
-              </div>
+              <div className="px-4 py-3 text-sm text-ink/60">Nenhum detalhe por elemento para esta auditoria.</div>
             ) : (
               elementRows.map((result, index) => (
                 <div
+                  className="grid gap-2 border-b border-line px-4 py-3 text-sm last:border-0 md:grid-cols-[130px_110px_90px_1fr]"
                   key={`${result.criteria_id}-${result.element_guid ?? "no-guid"}-${index}`}
-                  className="grid gap-3 border-b border-line px-4 py-3 text-sm last:border-0 md:grid-cols-[130px_110px_80px_1fr]"
                 >
-                  <span className="font-mono text-xs">{result.element_guid ?? "sem-guid"}</span>
-                  <span className={result.status === "approved" ? "text-moss" : "text-coral"}>
-                    {result.status}
-                  </span>
+                  <span className="font-mono text-xs text-ink/70">{result.element_guid ?? "sem-guid"}</span>
+                  <span className={result.status === "approved" ? "text-moss" : "text-coral"}>{result.status}</span>
                   <span className="capitalize">{result.severity}</span>
                   <span className="text-ink/70">
                     {result.message}

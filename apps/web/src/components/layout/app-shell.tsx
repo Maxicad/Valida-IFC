@@ -10,9 +10,11 @@ import {
   View,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import { LogoutLink } from "@/components/layout/logout-link";
+import { getStoredToken } from "@/services/api";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -26,6 +28,36 @@ const navItems = [
 
 export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const ensureSession = () => {
+      const token = getStoredToken();
+      if (!token) {
+        setReady(false);
+        router.replace("/login");
+        return;
+      }
+      setReady(true);
+    };
+
+    ensureSession();
+    const onAuthCleared = () => ensureSession();
+    window.addEventListener("valida-ifc-auth-cleared", onAuthCleared);
+
+    return () => {
+      window.removeEventListener("valida-ifc-auth-cleared", onAuthCleared);
+    };
+  }, [router]);
+
+  if (!ready) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-surface px-5 text-sm text-ink/65">
+        Validando sessao...
+      </main>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface text-ink">

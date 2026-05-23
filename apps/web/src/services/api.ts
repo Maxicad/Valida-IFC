@@ -1,6 +1,15 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
-function getStoredToken(): string | null {
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
+export function getStoredToken(): string | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -20,11 +29,36 @@ function authHeaders(): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+async function readErrorMessage(response: Response): Promise<string> {
+  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
+  if (contentType.includes("application/json")) {
+    const payload = await response.json().catch(() => null);
+    if (payload && typeof payload === "object") {
+      const detail =
+        "detail" in payload && typeof payload.detail === "string" ? payload.detail : null;
+      if (detail) {
+        return detail;
+      }
+    }
+  } else {
+    const text = (await response.text().catch(() => "")).trim();
+    if (text) {
+      return text;
+    }
+  }
+  return `API request failed: ${response.status}`;
+}
+
 async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    const message = error?.detail ?? `API request failed: ${response.status}`;
-    throw new Error(message);
+    const message = await readErrorMessage(response);
+    if (response.status === 401) {
+      clearStoredToken();
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("valida-ifc-auth-cleared"));
+      }
+    }
+    throw new ApiError(response.status, message);
   }
 
   if (response.status === 204) {
