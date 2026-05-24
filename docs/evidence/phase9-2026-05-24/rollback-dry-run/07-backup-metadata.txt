@@ -1,0 +1,10 @@
+﻿
+
+FullName      : C:\MaxiCAD_Projetos_IA\Valida-IFC\docs\evidence\phase9-2026-05-24\rollback-dry-run\06-postgres-backup-b
+                efore-rollback.sql
+Length        : 33786
+LastWriteTime : 24/05/2026 17:25:48
+
+
+
+

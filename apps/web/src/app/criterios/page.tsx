@@ -85,7 +85,7 @@ export default function CriteriaPage() {
   async function importCriteria(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!importFile) {
-      setError("Selecione um arquivo CSV, TXT, XLS ou XLSX.");
+      setError("Selecione um arquivo CSV, TXT, XLS, XLSX, IDS ou XML.");
       return;
     }
 
@@ -125,7 +125,7 @@ export default function CriteriaPage() {
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Criterios</h1>
-          <p className="text-sm text-ink/65">Importacao, cadastro manual e sugestoes por linguagem natural.</p>
+          <p className="text-sm text-ink/65">Defina o que o modelo precisa atender antes da auditoria.</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => void loadCriteria(selectedSetId)} variant="secondary">
@@ -185,7 +185,7 @@ export default function CriteriaPage() {
           <form className="mb-5 border-b border-line pb-5" onSubmit={importCriteria}>
             <h2 className="mb-3 font-semibold">Importar criterios</h2>
             <input
-              accept=".csv,.txt,.xls,.xlsx"
+              accept=".csv,.txt,.xls,.xlsx,.ids,.xml"
               className="w-full rounded-md border border-line bg-white px-3 py-2 text-sm"
               onChange={selectImportFile}
               type="file"
@@ -213,7 +213,7 @@ export default function CriteriaPage() {
             )}
           </form>
           <form className="mb-5 border-b border-line pb-5" onSubmit={createCriteriaSet}>
-            <h2 className="mb-3 font-semibold">Conjunto de criterios</h2>
+            <h2 className="mb-3 font-semibold">Grupo de criterios</h2>
             <input
               className="h-10 w-full rounded-md border border-line px-3 text-sm outline-none"
               onChange={(event) => setSetName(event.target.value)}
@@ -244,7 +244,7 @@ export default function CriteriaPage() {
           </form>
           <div className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-steel" />
-            <h2 className="font-semibold">Sugestao assistida</h2>
+            <h2 className="font-semibold">Sugestao de criterio</h2>
           </div>
           <textarea
             className="mt-4 min-h-32 w-full rounded-md border border-line p-3 text-sm outline-none focus:ring-2 focus:ring-steel/25"

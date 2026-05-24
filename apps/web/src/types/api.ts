@@ -114,6 +114,40 @@ export interface AuditResult {
   is_summary: boolean;
 }
 
+export interface AuditHistoryItem extends AuditRun {
+  project_name: string;
+  ifc_file_name: string;
+  criteria_set_name: string;
+  snapshot_count: number;
+}
+
+export interface AuditSnapshot {
+  id: string;
+  audit_run_id: string;
+  token: string;
+  view_url: string;
+  report_html_url: string;
+  expires_at: string;
+}
+
+export interface AuditFailureItem {
+  code: string;
+  element_guid?: string | null;
+  element_name?: string | null;
+  severity: string;
+  message: string;
+  fix_suggestion?: string | null;
+}
+
+export interface AuditComparison {
+  base_audit_id: string;
+  target_audit_id: string;
+  score_delta: number;
+  new_failures: AuditFailureItem[];
+  resolved_failures: AuditFailureItem[];
+  persistent_failures: AuditFailureItem[];
+}
+
 export interface ViewerElement {
   global_id: string;
   entity: string;

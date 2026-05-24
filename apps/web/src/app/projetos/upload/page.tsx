@@ -83,7 +83,7 @@ export default function UploadPage() {
   return (
     <AppShell>
       <h1 className="mb-2 text-2xl font-semibold">Upload IFC</h1>
-      <p className="mb-6 text-sm text-ink/65">Envio, validacao de extensao e leitura inicial do FILE_SCHEMA.</p>
+      <p className="mb-6 text-sm text-ink/65">Envie o modelo que sera auditado.</p>
 
       <Card className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <form
@@ -91,9 +91,9 @@ export default function UploadPage() {
           onSubmit={submit}
         >
           <FileUp className="h-10 w-10 text-steel" />
-          <h2 className="mt-4 text-lg font-semibold">Arraste o arquivo IFC</h2>
+          <h2 className="mt-4 text-lg font-semibold">Escolha o arquivo IFC</h2>
           <p className="mt-2 max-w-md text-sm text-ink/65">
-            O backend aceitara apenas `.ifc`, aplicara limite de tamanho e extraira a versao do cabecalho.
+            Aceitamos arquivos `.ifc` e identificamos a versao automaticamente.
           </p>
           <select
             className="mt-5 h-10 w-full max-w-md rounded-md border border-line bg-white px-3 text-sm"
@@ -145,10 +145,10 @@ export default function UploadPage() {
             <h2 className="font-semibold">Validacoes previstas</h2>
           </div>
           <ul className="mt-4 space-y-3 text-sm text-ink/70">
-            <li>Extensao `.ifc`.</li>
-            <li>Tamanho maximo configuravel.</li>
-            <li>Leitura de `FILE_SCHEMA`.</li>
-            <li>Registro do upload no projeto.</li>
+            <li>Confere se o arquivo e IFC.</li>
+            <li>Verifica o limite de tamanho.</li>
+            <li>Identifica a versao do modelo.</li>
+            <li>Vincula o arquivo ao projeto.</li>
           </ul>
           <div className="mt-6 border-t border-line pt-4">
             <h3 className="mb-3 text-sm font-semibold">Arquivos do projeto</h3>

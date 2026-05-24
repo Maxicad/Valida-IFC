@@ -9,11 +9,21 @@ services:
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - valida_ifc_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-valida_ifc} -d $${POSTGRES_DB:-valida_ifc}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   redis:
     image: redis:7-alpine
     ports:
       - "${REDIS_PORT:-6380}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   api:
     build:
@@ -26,8 +36,11 @@ services:
     volumes:
       - ./infra/storage:/data/storage
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: sh -c "alembic -c apps/api/alembic.ini upgrade head && uvicorn apps.api.app.main:app --host 0.0.0.0 --port 8000"
 
   worker:
     build:
@@ -38,7 +51,12 @@ services:
     volumes:
       - ./infra/storage:/data/storage
     depends_on:
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
 
 volumes:
   valida_ifc_postgres:

@@ -102,10 +102,11 @@ async def import_criteria(
         raise HTTPException(status_code=404, detail="Criteria set not found.")
 
     if criteria_set is None:
+        suffix = Path(file.filename).suffix.lower()
         criteria_set = CriteriaSet(
             name=name or Path(file.filename).stem,
             description=f"Importado de {file.filename}.",
-            source_type="import",
+            source_type="ids" if suffix in {".ids", ".xml"} else "import",
             created_by=current_user.id,
         )
         db.add(criteria_set)

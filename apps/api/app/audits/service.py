@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from time import perf_counter
 
 from fastapi import HTTPException
 from sqlalchemy import delete, select
@@ -7,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.audits.engine import AuditEvaluationBundle, EvaluatedCriterion, evaluate_criteria
 from app.core.models import AuditResult, AuditRun, CriteriaSet, Criterion, IfcFile, Project
+from app.core.observability import audit_id_ctx, logger, metrics
 from rules_engine.scoring import calculate_score
 
 
@@ -66,6 +68,8 @@ def create_pending_audit_run(
 
 
 def execute_audit_run(db: Session, audit_run: AuditRun, ifc_file: IfcFile, criteria: list[Criterion]) -> AuditRun:
+    audit_id_token = audit_id_ctx.set(audit_run.id)
+    started_perf = perf_counter()
     audit_run.status = "running"
     audit_run.error_message = None
     audit_run.started_at = datetime.utcnow()
@@ -92,13 +96,55 @@ def execute_audit_run(db: Session, audit_run: AuditRun, ifc_file: IfcFile, crite
         audit_run.finished_at = datetime.utcnow()
         audit_run.error_message = None
         db.flush()
+        duration_ms = round((perf_counter() - started_perf) * 1000, 2)
+        metrics.record_audit_completed(audit_run.id, audit_run.status, duration_ms)
+        logger.info(
+            "audit_completed",
+            extra={
+                "audit_id": audit_run.id,
+                "duration_ms": duration_ms,
+            },
+        )
         return audit_run
     except Exception as exc:
         audit_run.status = "failed"
         audit_run.error_message = str(exc)
         audit_run.finished_at = datetime.utcnow()
         db.flush()
+        duration_ms = round((perf_counter() - started_perf) * 1000, 2)
+        metrics.record_audit_completed(audit_run.id, audit_run.status, duration_ms)
+        logger.exception(
+            "audit_failed",
+            extra={
+                "audit_id": audit_run.id,
+                "duration_ms": duration_ms,
+            },
+        )
         raise
+    finally:
+        audit_id_ctx.reset(audit_id_token)
+
+
+def mark_audit_run_failed(db: Session, audit_run_id: str, error_message: str) -> AuditRun | None:
+    audit_run = db.get(AuditRun, audit_run_id)
+    if audit_run is None:
+        return None
+
+    audit_run.status = "failed"
+    audit_run.error_message = error_message
+    if audit_run.started_at is None:
+        audit_run.started_at = datetime.utcnow()
+    audit_run.finished_at = datetime.utcnow()
+    db.flush()
+    metrics.record_audit_completed(audit_run.id, audit_run.status, 0)
+    logger.error(
+        "audit_failed",
+        extra={
+            "audit_id": audit_run.id,
+            "duration_ms": 0,
+        },
+    )
+    return audit_run
 
 
 def execute_audit_run_by_id(db: Session, audit_run_id: str) -> AuditRun:

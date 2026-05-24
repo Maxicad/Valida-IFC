@@ -1,0 +1,42 @@
+{
+  "report": {
+    "auditId": "5a84cc28-7629-4b05-8706-dc5d99371ec8",
+    "projectName": "Projeto Print 1779627884530",
+    "ifcFileName": "modelo-e2e.ifc",
+    "score": 50,
+    "failed": 1,
+    "reportUrl": "http://127.0.0.1:8001/audits/5a84cc28-7629-4b05-8706-dc5d99371ec8/report/html"
+  },
+  "results": [
+    {
+      "browser": "chrome",
+      "channel": "chrome",
+      "passed": true,
+      "checks": {
+        "printActionsHidden": true,
+        "detailsPageBreak": true,
+        "noHorizontalOverflow": true,
+        "hasExecutiveSummary": true,
+        "hasCorrectionActions": true,
+        "hasDetails": true
+      },
+      "screenshotPath": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\phase6-print-preview-2026-05-24\\chrome-print-media.png",
+      "pdfPath": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\phase6-print-preview-2026-05-24\\chrome-print-preview.pdf"
+    },
+    {
+      "browser": "edge",
+      "channel": "msedge",
+      "passed": true,
+      "checks": {
+        "printActionsHidden": true,
+        "detailsPageBreak": true,
+        "noHorizontalOverflow": true,
+        "hasExecutiveSummary": true,
+        "hasCorrectionActions": true,
+        "hasDetails": true
+      },
+      "screenshotPath": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\phase6-print-preview-2026-05-24\\edge-print-media.png",
+      "pdfPath": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\phase6-print-preview-2026-05-24\\edge-print-preview.pdf"
+    }
+  ]
+}

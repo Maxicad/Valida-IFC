@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: valida_ifc_e2e
+      POSTGRES_USER: valida_ifc
+      POSTGRES_PASSWORD: valida_ifc
+    ports:
+      - "55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U valida_ifc -d valida_ifc_e2e"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "56379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      APP_ENV: e2e
+      DATABASE_URL: postgresql+psycopg://valida_ifc:valida_ifc@postgres:5432/valida_ifc_e2e
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: e2e-secret
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_ALLOWED_HOSTED_DOMAINS: ${GOOGLE_ALLOWED_HOSTED_DOMAINS:-[]}
+      LOCAL_STORAGE_PATH: /data/storage
+      CORS_ORIGINS: '["http://127.0.0.1:3100","http://localhost:3100"]'
+      AUDIT_JOB_TIMEOUT_SECONDS: 600
+      AUDIT_JOB_RESULT_TTL_SECONDS: 3600
+      AUDIT_JOB_FAILURE_TTL_SECONDS: 604800
+      AUDIT_JOB_MAX_RETRIES: 1
+      AUDIT_JOB_RETRY_INTERVALS_SECONDS: "[1]"
+    ports:
+      - "8001:8000"
+    volumes:
+      - e2e_storage:/data/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: sh -c "alembic -c apps/api/alembic.ini upgrade head && uvicorn apps.api.app.main:app --host 0.0.0.0 --port 8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    environment:
+      APP_ENV: e2e
+      DATABASE_URL: postgresql+psycopg://valida_ifc:valida_ifc@postgres:5432/valida_ifc_e2e
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: e2e-secret
+      LOCAL_STORAGE_PATH: /data/storage
+      AUDIT_JOB_TIMEOUT_SECONDS: 600
+      AUDIT_JOB_RESULT_TTL_SECONDS: 3600
+      AUDIT_JOB_FAILURE_TTL_SECONDS: 604800
+      AUDIT_JOB_MAX_RETRIES: 1
+      AUDIT_JOB_RETRY_INTERVALS_SECONDS: "[1]"
+      WORKER_STARTUP_TIMEOUT_SECONDS: 60
+      WORKER_STARTUP_POLL_SECONDS: 1
+    volumes:
+      - e2e_storage:/data/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+volumes:
+  e2e_storage:

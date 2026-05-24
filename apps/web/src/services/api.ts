@@ -77,6 +77,26 @@ export async function apiGet<T>(path: string): Promise<T> {
   return parseResponse<T>(response);
 }
 
+export async function apiGetArrayBuffer(path: string): Promise<ArrayBuffer> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: { Accept: "application/octet-stream", ...authHeaders() },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const message = await readErrorMessage(response);
+    if (response.status === 401) {
+      clearStoredToken();
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("valida-ifc-auth-cleared"));
+      }
+    }
+    throw new ApiError(response.status, message);
+  }
+
+  return response.arrayBuffer();
+}
+
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",

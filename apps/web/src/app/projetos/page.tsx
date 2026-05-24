@@ -67,10 +67,10 @@ export default function ProjectsPage() {
       <section className="rounded-lg border border-line bg-panel p-5 shadow-soft md:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-steel">Base de Projetos</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-steel">Projetos</p>
             <h1 className="mt-1 text-2xl font-semibold text-ink">Projetos IFC</h1>
             <p className="mt-2 max-w-2xl text-sm text-ink/65">
-              Cadastre e acompanhe os modelos que serao usados nas auditorias e no visualizador.
+              Crie um projeto para reunir arquivos IFC, criterios e resultados de auditoria.
             </p>
           </div>
           <Button onClick={() => void loadProjects()} type="button" variant="secondary">
@@ -85,7 +85,7 @@ export default function ProjectsPage() {
       <section className="mt-4 grid gap-4 xl:grid-cols-[360px_1fr]">
         <Card className="p-4 md:p-5">
           <h2 className="text-lg font-semibold text-ink">Novo projeto</h2>
-          <p className="mt-1 text-sm text-ink/60">Informacoes basicas para iniciar uploads e auditorias.</p>
+          <p className="mt-1 text-sm text-ink/60">Informe nome e cliente para comecar.</p>
 
           <form className="mt-4 space-y-3" onSubmit={createProject}>
             <label className="block text-sm font-medium text-ink/90">

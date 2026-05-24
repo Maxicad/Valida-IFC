@@ -1,0 +1,12 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('ViewDefinition [CoordinationView]'),'2;1');
+FILE_NAME('modelo-e2e.ifc','2026-05-23T00:00:00',('Valida IFC'),('Codex'),'Valida IFC','E2E','');
+FILE_SCHEMA(('IFC4'));
+ENDSEC;
+DATA;
+#10=IFCPROJECT('PROJECT_E2E',$,'Projeto E2E',$,$,$,$,$,$);
+#11=IFCWALL('WALL_OK',$,'Parede OK',$,$,$,$,$,$);
+#12=IFCWALL('WALL_FAIL',$,$,$,$,$,$,$,$);
+ENDSEC;
+END-ISO-10303-21;

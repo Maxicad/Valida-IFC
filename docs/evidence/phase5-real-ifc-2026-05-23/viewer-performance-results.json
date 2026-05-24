@@ -1,0 +1,80 @@
+{
+  "started_at": "2026-05-23T19:16:59.864Z",
+  "finished_at": "2026-05-23T19:20:06.655Z",
+  "api_base_url": "http://localhost:8000",
+  "web_base_url": "http://localhost:3001",
+  "results": [
+    {
+      "ifc": {
+        "path": "G:\\Drives compartilhados\\MaxiCAD Projetos\\IFCMaxi\\00 - Modelos BIM\\07 - Elétrica\\07 - Obsoletos\\01 - Projeto básico\\SALE-ELE-PB-0000-EMBA-MODE-R02.ifc",
+        "file_name": "SALE-ELE-PB-0000-EMBA-MODE-R02.ifc",
+        "size_mb": 85.08
+      },
+      "api": {
+        "project_id": "94dfa7ac-6fd9-42e6-a0cb-4ca964647a8c",
+        "ifc_file_id": "563a6bbe-d853-49de-8daa-c40a2b21bf17",
+        "backend_geometry_elements": 300,
+        "backend_geometry_ms": 35719,
+        "target_entity": "IfcBuildingElementProxy",
+        "target_global_id": "3go9mrRuDDUfE_zzaW_khg",
+        "audit_status": "completed",
+        "audit_id": "9524bf8b-31ab-4fe9-9a61-37f7d43230d7",
+        "failed_results": 933
+      },
+      "viewer": {
+        "loader_source": "web-ifc",
+        "canvas_present": true,
+        "render_complete": false,
+        "load_and_render_ms": 127690,
+        "canvas_counter": null,
+        "canvas_render_ms": null,
+        "triangles_text": null,
+        "heap_after_load": {
+          "used_js_heap_mb": 289.9,
+          "total_js_heap_mb": 307.1,
+          "js_heap_limit_mb": 3585.8
+        },
+        "heap_after_orbit": {
+          "used_js_heap_mb": 289.9,
+          "total_js_heap_mb": 307.1,
+          "js_heap_limit_mb": 3585.8
+        },
+        "heap_after_filters": {
+          "used_js_heap_mb": 289.9,
+          "total_js_heap_mb": 307.1,
+          "js_heap_limit_mb": 3585.8
+        },
+        "idle_frames": {
+          "samples": 181,
+          "fps_avg": 60,
+          "frame_ms_avg": 16.7,
+          "frame_ms_p95": 16.7,
+          "long_frames_over_50ms": 0
+        },
+        "orbit_frames": {
+          "samples": 151,
+          "fps_avg": 60,
+          "frame_ms_avg": 16.7,
+          "frame_ms_p95": 16.8,
+          "long_frames_over_50ms": 0
+        },
+        "filter_frames": {
+          "samples": 151,
+          "fps_avg": 60,
+          "frame_ms_avg": 16.7,
+          "frame_ms_p95": 16.8,
+          "long_frames_over_50ms": 0
+        },
+        "global_id_filter_visible": true,
+        "code_filter": {
+          "code": "PERF-GID-001",
+          "failed_global_id": "3go9mrRuDDUfE_zzaW_khg",
+          "code_visible": true,
+          "global_id_visible": true
+        },
+        "console_errors": [],
+        "page_errors": []
+      }
+    }
+  ]
+}

@@ -3,7 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_current_user
-from app.auth.schemas import CurrentUserResponse, LoginRequest, RegisterRequest, TokenResponse
+from app.auth.google import GoogleTokenError, verify_google_id_token
+from app.auth.schemas import CurrentUserResponse, GoogleLoginRequest, LoginRequest, RegisterRequest, TokenResponse
 from app.core.database import get_db
 from app.core.models import User
 from app.core.security import create_access_token, hash_password, verify_password
@@ -34,6 +35,36 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
     user = db.scalar(select(User).where(User.email == payload.email))
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
+
+    token = create_access_token(subject=user.id, extra_claims={"role": user.role, "email": user.email})
+    return TokenResponse(access_token=token)
+
+
+@router.post("/google", response_model=TokenResponse)
+def google_login(payload: GoogleLoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
+    try:
+        claims = verify_google_id_token(payload.id_token)
+    except GoogleTokenError as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
+
+    email = str(claims.get("email") or "").lower()
+    email_verified = claims.get("email_verified") is True or str(claims.get("email_verified")).lower() == "true"
+    if not email or not email_verified:
+        raise HTTPException(status_code=401, detail="Google account email is not verified.")
+    if not claims.get("sub"):
+        raise HTTPException(status_code=401, detail="Invalid Google credential.")
+
+    user = db.scalar(select(User).where(User.email == email))
+    if user is None:
+        user = User(
+            name=str(claims.get("name") or email.split("@")[0]),
+            email=email,
+            password_hash=f"google-oauth:{claims.get('sub', '')}",
+            role="auditor_bim",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
     token = create_access_token(subject=user.id, extra_claims={"role": user.role, "email": user.email})
     return TokenResponse(access_token=token)

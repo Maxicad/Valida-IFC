@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DataOctopus x Valida-IFC - Avaliacao Comparativa</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f6f8;
+        --panel: #ffffff;
+        --panel-2: #f9fbfc;
+        --line: #d8e0e7;
+        --ink: #1c2934;
+        --muted: #637381;
+        --blue: #315f83;
+        --green: #2f7a4d;
+        --amber: #a86f1e;
+        --red: #ad3d3d;
+        --violet: #5d557f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        line-height: 1.48;
+      }
+
+      .wrap {
+        max-width: 1220px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      header,
+      section {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--panel);
+        box-shadow: 0 10px 26px rgba(25, 40, 55, 0.05);
+      }
+
+      header {
+        padding: 26px;
+      }
+
+      section {
+        margin-top: 18px;
+        padding: 22px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(28px, 4vw, 44px);
+        line-height: 1.06;
+        max-width: 880px;
+      }
+
+      h2 {
+        font-size: 22px;
+        margin-bottom: 14px;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .lead {
+        margin-top: 14px;
+        max-width: 900px;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--panel-2);
+        padding: 6px 10px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid.four {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-2);
+        padding: 16px;
+      }
+
+      .kpi strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 26px;
+      }
+
+      .kpi span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      ul,
+      ol {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+
+      li {
+        margin: 6px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 8px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+        font-size: 14px;
+      }
+
+      th {
+        background: #eef3f7;
+        color: #3d4f5f;
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .badge {
+        display: inline-flex;
+        border-radius: 999px;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .good {
+        background: #dff1e5;
+        color: var(--green);
+      }
+
+      .warn {
+        background: #fff0d8;
+        color: var(--amber);
+      }
+
+      .bad {
+        background: #f8dddd;
+        color: var(--red);
+      }
+
+      .neutral {
+        background: #e8edf2;
+        color: #4c5c69;
+      }
+
+      .accent {
+        background: #eceaf5;
+        color: var(--violet);
+      }
+
+      .score {
+        display: grid;
+        grid-template-columns: 160px 1fr 52px;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        font-size: 14px;
+      }
+
+      .bar {
+        height: 9px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #e4ebf0;
+      }
+
+      .bar span {
+        display: block;
+        height: 100%;
+        background: var(--blue);
+      }
+
+      .callout {
+        border-left: 4px solid var(--blue);
+        background: #f2f7fb;
+        padding: 14px 16px;
+        border-radius: 8px;
+      }
+
+      .callout.risk {
+        border-left-color: var(--red);
+        background: #fff4f4;
+      }
+
+      .callout.opportunity {
+        border-left-color: var(--green);
+        background: #f1faf4;
+      }
+
+      .small {
+        font-size: 13px;
+      }
+
+      a {
+        color: var(--blue);
+      }
+
+      @media (max-width: 980px) {
+        .grid.two,
+        .grid.three,
+        .grid.four {
+          grid-template-columns: 1fr;
+        }
+
+        .score {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header>
+        <h1>DataOctopus x Valida-IFC: avaliacao profunda e plano leve de evolucao</h1>
+        <p class="lead">
+          Comparativo baseado na navegacao em dataoctopus.net, incluindo a area logada da conta MaxiCAD, paginas de
+          checks, arquivos, snapshots, creditos, ajuda e AI Fix, e no estado atual do projeto Valida-IFC neste
+          repositorio.
+        </p>
+        <div class="meta">
+          <span class="pill">Snapshot: 2026-05-23</span>
+          <span class="pill">Escopo web: somente dataoctopus.net e subpaginas</span>
+          <span class="pill">Escopo local: Valida-IFC em C:\MaxiCAD_Projetos_IA\Valida-IFC</span>
+          <span class="pill">Modo: leitura e avaliacao, sem executar checks pagos</span>
+        </div>
+      </header>
+
+      <section>
+        <h2>Resumo executivo</h2>
+        <div class="grid four">
+          <div class="card kpi">
+            <span>DataOctopus</span>
+            <strong>Produto focado</strong>
+            <p class="muted small">IFC + IDS + historico + compartilhamento.</p>
+          </div>
+          <div class="card kpi">
+            <span>Valida-IFC</span>
+            <strong>Base tecnica forte</strong>
+            <p class="muted small">Motor proprio, viewer real, API, worker e testes.</p>
+          </div>
+          <div class="card kpi">
+            <span>Maior risco nosso</span>
+            <strong>Produto pesado</strong>
+            <p class="muted small">Muitas capacidades antes de um fluxo simples e memoravel.</p>
+          </div>
+          <div class="card kpi">
+            <span>Maior oportunidade</span>
+            <strong>IDS + Snapshots</strong>
+            <p class="muted small">Adotar o que e simples, sem copiar o que e limitado.</p>
+          </div>
+        </div>
+
+        <div class="callout opportunity" style="margin-top: 16px">
+          <strong>Leitura central:</strong> DataOctopus vence em simplicidade de produto, narrativa comercial e
+          acompanhamento de evolucao por projeto. Valida-IFC vence em potencial tecnico: regras configuraveis,
+          criticidade ponderada, viewer 3D com GlobalId e processamento assincrono. O melhor caminho e copiar a
+          disciplina de fluxo do DataOctopus, nao tentar copiar so a aparencia.
+        </div>
+      </section>
+
+      <section>
+        <h2>O que foi observado no DataOctopus</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>Ferramentas e fluxo</h3>
+            <ul>
+              <li>Dashboard por projeto com seletor de projeto, checks, arquivos, snapshots e creditos.</li>
+              <li>Check criado a partir de um par IFC + IDS, com nome, comentario, disciplina e aceite de uso de credito.</li>
+              <li>Historico de checks com grafico de resultados ao longo do tempo.</li>
+              <li>Resultado detalhado com requisitos falhos, requisitos aprovados e contagem de elementos afetados.</li>
+              <li>Tags por check para filtrar por disciplina, fase ou classificacao interna.</li>
+              <li>Snapshots para compartilhar uma visao somente leitura do progresso.</li>
+              <li>AI Fix com orientacao por software autoral: Revit, Archicad, Vectorworks e Tekla.</li>
+              <li>Modelo comercial simples: 3 checks gratis e pacotes por credito, observados na pagina publica.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Organizacao de dados</h3>
+            <ul>
+              <li>Conta/tenant: exemplo observado como MaxiCAD.</li>
+              <li>Projeto: Demo Project, com aviso claro de ambiente demonstrativo.</li>
+              <li>Arquivos: separacao explicita entre IFC Files e IDS Files.</li>
+              <li>IFC versionado por comentarios P01, P02, P03, P04 e P05.</li>
+              <li>Check: nome, comentario, IFC usado, IDS usado, data de processamento, disciplina e tags.</li>
+              <li>Resultado: requisitos, status, elementos afetados, elementos totais e tendencia percentual.</li>
+              <li>Credito: unidade economica clara, 1 check consome 1 credito.</li>
+              <li>Precificacao publica observada: 5, 20, 50 e 100 creditos com desconto progressivo por volume.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Comparativo por dimensao</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Dimensao</th>
+              <th>DataOctopus</th>
+              <th>Valida-IFC hoje/proposta</th>
+              <th>Diagnostico</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Foco de produto</td>
+              <td>Estreito: validar IFC contra IDS com minimo atrito.</td>
+              <td>Mais amplo: projetos, criterios proprios, auditoria, viewer, relatorios, IA futura, exports.</td>
+              <td><span class="badge warn">Risco Valida-IFC</span> Mais valor tecnico, mas maior chance de parecer complexo.</td>
+            </tr>
+            <tr>
+              <td>Fluxo principal</td>
+              <td>Escolher IFC + IDS, rodar check, ver falhas, acompanhar evolucao.</td>
+              <td>Projeto -> upload IFC -> importar criterios -> auditar -> viewer -> relatorio.</td>
+              <td><span class="badge good">Bom</span> Valida-IFC tem fluxo completo, mas precisa de um modo rapido.</td>
+            </tr>
+            <tr>
+              <td>Padrao openBIM</td>
+              <td>IDS e IFC sao o centro do produto.</td>
+              <td>Criterios internos ja existem; IDS, BCF e bSDD estao no roadmap.</td>
+              <td><span class="badge bad">Muito ruim hoje</span> Sem IDS real, ficamos menos interoperaveis.</td>
+            </tr>
+            <tr>
+              <td>Resultados</td>
+              <td>Requisitos aprovados/falhos, elementos afetados e grafico historico.</td>
+              <td>Score ponderado por criticidade, resumo por criterio, detalhe por elemento, HTML/PDF.</td>
+              <td><span class="badge good">Valida-IFC forte</span> Score por criticidade pode ser diferencial.</td>
+            </tr>
+            <tr>
+              <td>Viewer</td>
+              <td>O produto observado e orientado a dados e relatorio, nao a inspecao 3D profunda.</td>
+              <td>Three.js + web-ifc, fallback backend, GlobalId, filtros, canvas com evidencia em IFC de 85 MB.</td>
+              <td><span class="badge good">Nosso diferencial</span> Manter leve com viewer sob demanda, nao como primeira etapa obrigatoria.</td>
+            </tr>
+            <tr>
+              <td>Compartilhamento</td>
+              <td>Snapshots prontos para visao read-only sem login.</td>
+              <td>Relatorios HTML/PDF, mas sem snapshot publico versionado no produto.</td>
+              <td><span class="badge bad">Muito ruim hoje</span> Falta uma forma simples de mandar evidencias para cliente.</td>
+            </tr>
+            <tr>
+              <td>Correcoes orientadas</td>
+              <td>AI Fix traduz falhas em passos por Revit, Archicad, Vectorworks e Tekla.</td>
+              <td>Ha campo de sugestao de correcao e proposta de linguagem natural, mas sem assistente operacional real.</td>
+              <td><span class="badge warn">Oportunidade</span> Usar sugestoes curtas e verificaveis, sem virar chatbot pesado.</td>
+            </tr>
+            <tr>
+              <td>Modelo comercial</td>
+              <td>Creditos por check, claro e leve: trial gratis, pacotes pequenos.</td>
+              <td>Nao ha modelo comercial no produto local.</td>
+              <td><span class="badge neutral">Produto interno</span> Para SaaS, pensar em creditos ou limites por projeto.</td>
+            </tr>
+            <tr>
+              <td>Qualidade tecnica</td>
+              <td>Produto online maduro no fluxo visivel, mas caixa-preta tecnica.</td>
+              <td>Testes, E2E, worker, observabilidade, API modular, evidencias de performance.</td>
+              <td><span class="badge good">Valida-IFC forte</span> A base de engenharia ja esta acima do que a UI comunica.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Pontos fortes</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>DataOctopus</h3>
+            <ul>
+              <li><strong>Simplicidade brutal:</strong> IFC + IDS + check. O usuario entende rapido o que fazer.</li>
+              <li><strong>Historico visual:</strong> grafico de progresso mostra melhoria entre entregas P01-P05.</li>
+              <li><strong>Separacao de arquivos:</strong> IFC e IDS ficam em secoes diferentes e faceis de reconhecer.</li>
+              <li><strong>Snapshots:</strong> resolve comunicacao com stakeholders sem criar usuarios para todos.</li>
+              <li><strong>AI Fix pragmatica:</strong> nao promete corrigir o modelo; explica como corrigir no software autoral.</li>
+              <li><strong>Preco entendivel:</strong> credito por check evita configuracao comercial complexa.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Valida-IFC</h3>
+            <ul>
+              <li><strong>Motor flexivel:</strong> regras internas por tipo, operador, criticidade e mensagem de correcao.</li>
+              <li><strong>Score ponderado:</strong> baixa, moderada e alta permitem decisao mais tecnica que pass/fail simples.</li>
+              <li><strong>Viewer real:</strong> web-ifc, Three.js, GlobalId, filtros e evidencia com IFC de 85 MB.</li>
+              <li><strong>Arquitetura evolutiva:</strong> FastAPI, Next.js, worker Redis/RQ, PostgreSQL e testes E2E.</li>
+              <li><strong>Relatorio HTML/PDF:</strong> ja ha base para entrega tecnica auditavel.</li>
+              <li><strong>Observabilidade:</strong> logs, metricas e alertas ja aparecem no controle do projeto.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Fraquezas</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>DataOctopus</h3>
+            <ul>
+              <li>Depende fortemente de IDS; quem ainda trabalha com planilhas BIM precisa converter antes.</li>
+              <li>Nao ficou evidente um editor completo de IDS dentro do fluxo observado.</li>
+              <li>Resultado e bom para requisito, mas parece menos profundo em viewer 3D e investigacao espacial.</li>
+              <li>AI Fix tem aviso de confiabilidade; e orientacao, nao garantia de correcao.</li>
+              <li>Modelo por credito e otimo para leveza, mas pode inibir checks iterativos em times grandes.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Valida-IFC</h3>
+            <ul>
+              <li>A proposta e maior que a experiencia atual: linguagem natural, IDS, BCF e bSDD ainda nao estao fechados.</li>
+              <li>Dashboard atual ainda tem indicadores placeholder para auditorias pendentes e falhas criticas.</li>
+              <li>Relatorio visual ainda precisa polimento para cliente final e padrao executivo.</li>
+              <li>Nao ha snapshots read-only nem historico de melhoria por versao do IFC como experiencia central.</li>
+              <li>Criterios assistidos por IA aparecem na interface, mas ainda nao completam o fluxo de sugestao revisavel.</li>
+              <li>A riqueza do viewer pode virar peso se for exigida antes do usuario enxergar o resultado do check.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Onde o Valida-IFC esta bom e onde esta muito ruim</h2>
+        <div class="grid two">
+          <div class="callout opportunity">
+            <h3>Onde estamos bons</h3>
+            <ul>
+              <li>Base tecnica modular e testada, com evidencia real de backend, frontend, E2E e viewer.</li>
+              <li>Capacidade de auditoria propria, nao limitada a IDS.</li>
+              <li>Criticidade ponderada e sugestao de correcao por regra.</li>
+              <li>Viewer 3D integrado ao resultado por GlobalId, que pode virar diferencial forte em BIM.</li>
+              <li>Processamento assincrono, WebSocket/polling e worker real, importante para IFC grande.</li>
+            </ul>
+          </div>
+          <div class="callout risk">
+            <h3>Onde estamos muito ruins</h3>
+            <ul>
+              <li><strong>IDS:</strong> DataOctopus fala a lingua padrao do mercado; nos ainda estamos centrados em schema proprio.</li>
+              <li><strong>Fluxo rapido:</strong> falta um botao mental simples: "suba IFC + requisito e veja o resultado".</li>
+              <li><strong>Compartilhamento:</strong> sem snapshots, o relatorio vira arquivo; nao vira uma pagina viva de acompanhamento.</li>
+              <li><strong>Historico:</strong> nao ha comparacao clara P01/P02/P03 por projeto, score e falhas recorrentes.</li>
+              <li><strong>Produto comercial:</strong> ainda nao existe unidade de valor simples como check, projeto ou pacote.</li>
+              <li><strong>UX de criterios:</strong> importar planilha e criar criterio e util, mas ainda parece tecnico demais para gestor BIM.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Oportunidades para Valida-IFC</h2>
+        <div class="grid three">
+          <div class="card">
+            <h3>1. Modo Check Rapido</h3>
+            <p class="muted small">Uma tela unica para escolher IFC, escolher criterios/IDS e executar. O usuario pode aprofundar depois.</p>
+            <div class="score"><span>Impacto</span><div class="bar"><span style="width: 92%"></span></div><strong>Alto</strong></div>
+            <div class="score"><span>Peso no sistema</span><div class="bar"><span style="width: 28%"></span></div><strong>Baixo</strong></div>
+          </div>
+          <div class="card">
+            <h3>2. Snapshots read-only</h3>
+            <p class="muted small">Link publico ou protegido por chave com resumo, grafico, requisitos e downloads permitidos.</p>
+            <div class="score"><span>Impacto</span><div class="bar"><span style="width: 88%"></span></div><strong>Alto</strong></div>
+            <div class="score"><span>Peso no sistema</span><div class="bar"><span style="width: 42%"></span></div><strong>Medio</strong></div>
+          </div>
+          <div class="card">
+            <h3>3. Historico por versao IFC</h3>
+            <p class="muted small">Linha do tempo por P01, P02, P03 com score, falhas e regressao/melhoria.</p>
+            <div class="score"><span>Impacto</span><div class="bar"><span style="width: 85%"></span></div><strong>Alto</strong></div>
+            <div class="score"><span>Peso no sistema</span><div class="bar"><span style="width: 34%"></span></div><strong>Baixo</strong></div>
+          </div>
+          <div class="card">
+            <h3>4. Importacao IDS</h3>
+            <p class="muted small">Converter IDS para criterios internos e manter o arquivo original como evidencia.</p>
+            <div class="score"><span>Impacto</span><div class="bar"><span style="width: 95%"></span></div><strong>Alto</strong></div>
+            <div class="score"><span>Peso no sistema</span><div class="bar"><span style="width: 62%"></span></div><strong>Medio</strong></div>
+          </div>
+          <div class="card">
+            <h3>5. Fix Guide leve</h3>
+            <p class="muted small">Orientacao curta por falha: onde ajustar em Revit, Archicad ou outro software, sempre revisavel.</p>
+            <div class="score"><span>Impacto</span><div class="bar"><span style="width: 78%"></span></div><strong>Alto</strong></div>
+            <div class="score"><span>Peso no sistema</span><div class="bar"><span style="width: 30%"></span></div><strong>Baixo</strong></div>
+          </div>
+          <div class="card">
+            <h3>6. Tags e disciplinas</h3>
+            <p class="muted small">Tags simples para etapa, disciplina, pacote, responsavel e status de revisao.</p>
+            <div class="score"><span>Impacto</span><div class="bar"><span style="width: 70%"></span></div><strong>Medio</strong></div>
+            <div class="score"><span>Peso no sistema</span><div class="bar"><span style="width: 22%"></span></div><strong>Baixo</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Plano de boas ideias mantendo o sistema leve</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Prioridade</th>
+              <th>Ideia</th>
+              <th>Implementacao enxuta</th>
+              <th>Evitar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge good">P0</span></td>
+              <td>Check Rapido</td>
+              <td>Tela unica com tres campos: projeto, IFC, criterio/IDS. Resultado abre no resumo; viewer fica como acao secundaria.</td>
+              <td>Wizard longo, muitas etapas, configuracoes avancadas antes do primeiro resultado.</td>
+            </tr>
+            <tr>
+              <td><span class="badge good">P0</span></td>
+              <td>Historico de conformidade</td>
+              <td>Guardar versao/apelido do IFC e plotar score por data, igual ao grafico de checks observado.</td>
+              <td>Dashboard generico com graficos que nao respondem "melhorou ou piorou?".</td>
+            </tr>
+            <tr>
+              <td><span class="badge good">P0</span></td>
+              <td>Snapshot compartilhavel</td>
+              <td>Tabela `snapshots` com token, titulo, descricao, ocultar detalhe, lista de auditorias e expiracao opcional.</td>
+              <td>Criar contas para todo cliente so para visualizar um relatorio.</td>
+            </tr>
+            <tr>
+              <td><span class="badge warn">P1</span></td>
+              <td>IDS MVP</td>
+              <td>Parser de IDS para um subconjunto: entidade, propriedade, valor permitido, obrigatoriedade. Manter o XML original.</td>
+              <td>Tentar cobrir todo IDS e bSDD antes de validar os casos mais comuns.</td>
+            </tr>
+            <tr>
+              <td><span class="badge warn">P1</span></td>
+              <td>Fix Guide</td>
+              <td>Campo `fix_guide` por resultado, gerado por templates primeiro e IA depois. Mostrar aviso de verificacao humana.</td>
+              <td>Prometer correcao automatica no Revit/Archicad sem integracao real.</td>
+            </tr>
+            <tr>
+              <td><span class="badge warn">P1</span></td>
+              <td>Tags e filtros de fase</td>
+              <td>Tags livres em auditoria e arquivo: disciplina, etapa, pacote, revisao. Usar para filtros e snapshots.</td>
+              <td>Modelo complexo de workflow BIM com permissao por cada transicao logo no MVP.</td>
+            </tr>
+            <tr>
+              <td><span class="badge neutral">P2</span></td>
+              <td>Relatorio executivo bonito</td>
+              <td>Template limpo com capa, resumo, score, top falhas, historico e anexos por elemento.</td>
+              <td>Relatorio gigante que tenta substituir planilha, BCF, viewer e ata de reuniao.</td>
+            </tr>
+            <tr>
+              <td><span class="badge neutral">P2</span></td>
+              <td>BCF export simples</td>
+              <td>Exportar apenas falhas com GlobalId, titulo, descricao e screenshot opcional.</td>
+              <td>Editor BCF completo antes de provar export/import basico.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Recomendacao de arquitetura leve</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>Adicionar sem pesar</h3>
+            <ul>
+              <li>`audit_tags`: tabela simples para tags por auditoria.</li>
+              <li>`ifc_file.version_label`: campo curto tipo P01, R02, S5.</li>
+              <li>`snapshots`: token, projeto, auditorias, titulo, descricao e flags de visibilidade.</li>
+              <li>`ids_files`: armazenar XML IDS e status de conversao para criterios internos.</li>
+              <li>`fix_guides`: template ou texto gerado por falha, com fonte e data.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Manter fora por enquanto</h3>
+            <ul>
+              <li>CDE completo com aprovacoes documentais.</li>
+              <li>Editor visual complexo de IDS no primeiro ciclo.</li>
+              <li>Correcao automatica de modelo BIM.</li>
+              <li>Viewer carregado automaticamente em toda auditoria.</li>
+              <li>Workflow de permissoes granular demais antes de UAT.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Backlog sugerido em 30 dias</h2>
+        <ol>
+          <li><strong>Semana 1:</strong> criar `version_label` para IFC, tags de auditoria e grafico de score historico no dashboard.</li>
+          <li><strong>Semana 1:</strong> transformar `/auditorias` em modo rapido com formulario compacto e resultado imediato.</li>
+          <li><strong>Semana 2:</strong> implementar snapshots read-only com token e pagina publica minimalista.</li>
+          <li><strong>Semana 2:</strong> polir relatorio executivo para imprimir bem e apontar para viewer/snapshot.</li>
+          <li><strong>Semana 3:</strong> importar IDS MVP para regras internas cobrindo entidade e propriedade obrigatoria.</li>
+          <li><strong>Semana 3:</strong> adicionar comparacao entre versoes do mesmo IFC: novas falhas, falhas resolvidas e falhas persistentes.</li>
+          <li><strong>Semana 4:</strong> Fix Guide por template para Revit/Archicad nos 5 tipos de falha mais comuns.</li>
+          <li><strong>Semana 4:</strong> validar com um projeto real pequeno e ajustar textos, filtros e relatorio antes de expandir.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Conclusao</h2>
+        <div class="callout">
+          <p>
+            O DataOctopus mostra uma licao clara: um sistema leve nao e um sistema pobre; e um sistema que escolhe
+            poucas decisoes centrais e as torna obvias. O Valida-IFC nao deve abandonar seu diferencial tecnico,
+            especialmente viewer, criticidade e motor proprio. Mas deve embrulhar tudo em uma experiencia mais curta:
+            check rapido, historico por versao, snapshot compartilhavel, IDS MVP e guias de correcao. Esse conjunto
+            entrega valor de mercado sem transformar o produto em uma plataforma pesada demais antes da hora.
+          </p>
+        </div>
+        <p class="muted small" style="margin-top: 12px">
+          Evidencias locais consultadas: docs/PROJECT_CONTROL_CHECKLIST.md, docs/VIEWER_SPEC.md,
+          docs/RULES_SCHEMA.md, docs/evidence/phase4-closure-2026-05-23/RESULTS.md,
+          docs/evidence/phase5-real-ifc-2026-05-23/RESULTS.md e telas principais do frontend.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

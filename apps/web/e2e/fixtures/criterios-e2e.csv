@@ -1,0 +1,3 @@
+codigo,nome,criticidade,tipo_regra,entidade_ifc,propriedade,operador,valor_esperado,ativo,mensagem_falha,sugestao_correcao
+IFC-SCHEMA-001,Versao minima IFC,alta,ifc_schema,,FILE_SCHEMA,in,IFC4|IFC4X3,sim,Arquivo deve estar em IFC4,Exportar novamente em IFC4
+IFC-PROP-001,Nome obrigatorio,alta,property_not_empty,IfcWall,Name,not_empty,,sim,Nome obrigatorio,Preencher Name do elemento

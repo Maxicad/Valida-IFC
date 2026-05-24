@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 
 from app.auth.router import router as auth_router
 from app.audits.router import router as audits_router
 from app.core.config import settings
-from app.core.logging import request_logging_middleware
+from app.core.observability import active_alerts, configure_logging, prometheus_metrics, request_observability_middleware
 from app.criteria.router import router as criteria_router
 from app.files.router import router as files_router
 from app.projects.router import router as projects_router
@@ -13,6 +14,7 @@ from app.users.router import router as users_router
 
 
 def create_app() -> FastAPI:
+    configure_logging()
     api = FastAPI(
         title="Valida IFC API",
         description="API para auditoria BIM/openBIM de arquivos IFC.",
@@ -26,11 +28,20 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    api.middleware("http")(request_logging_middleware)
+    api.middleware("http")(request_observability_middleware)
 
     @api.get("/health", tags=["health"])
     def health() -> dict[str, str]:
         return {"status": "ok", "service": "valida-ifc-api"}
+
+    @api.get("/metrics", tags=["observability"], response_class=PlainTextResponse)
+    def metrics() -> str:
+        return prometheus_metrics()
+
+    @api.get("/alerts", tags=["observability"])
+    def alerts() -> dict:
+        alerts_payload = active_alerts()
+        return {"status": "firing" if alerts_payload else "ok", "alerts": alerts_payload}
 
     api.include_router(auth_router)
     api.include_router(users_router)

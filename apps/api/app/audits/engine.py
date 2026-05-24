@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from app.audits.ifc_adapter import IfcAuditContext, IfcElementRef
 from app.core.models import Criterion, IfcFile
+from app.criteria.fix_guides import build_fix_suggestion
 from rules_engine.severity import severity_weight
 
 
@@ -395,7 +396,7 @@ def summary_result(
         expected_value=expected_value,
         weight=weight,
         score_value=weight if status == "approved" else 0,
-        fix_suggestion=criterion.fix_suggestion,
+        fix_suggestion=criterion.fix_suggestion or default_fix_suggestion(criterion),
         is_summary=True,
     )
 
@@ -419,7 +420,7 @@ def detailed_result(
         expected_value=expected_value,
         weight=weight,
         score_value=weight if status == "approved" else 0,
-        fix_suggestion=criterion.fix_suggestion,
+        fix_suggestion=criterion.fix_suggestion or default_fix_suggestion(criterion),
         element_guid=element.guid,
         element_type=element.entity,
         element_name=element.name,
@@ -430,6 +431,15 @@ def split_expected_values(value: str | None) -> list[str]:
     if value is None:
         return []
     return [part.strip().upper() for part in re.split(r"[|,;]", value) if part.strip()]
+
+
+def default_fix_suggestion(criterion: Criterion) -> str | None:
+    return build_fix_suggestion(
+        rule_type=criterion.rule_type,
+        entity_ifc=criterion.entity_ifc,
+        property_name=criterion.property_name,
+        expected_value=criterion.expected_value,
+    )
 
 
 def _property_result_message(

@@ -28,6 +28,9 @@ samples/ifc/*.ifc
 samples/reports/*
 !samples/reports/.gitkeep
 apps/api/storage/
+.e2e/
+test-results/
+playwright-report/
 
 # OS/editor
 .DS_Store

@@ -44,3 +44,41 @@ class AuditResultResponse(BaseModel):
     score_value: int = 0
     fix_suggestion: str | None = None
     is_summary: bool = False
+
+
+class AuditHistoryItem(AuditRunResponse):
+    project_name: str
+    ifc_file_name: str
+    criteria_set_name: str
+    snapshot_count: int = 0
+
+
+class SnapshotCreate(BaseModel):
+    expires_in_days: int = 30
+
+
+class SnapshotResponse(BaseModel):
+    id: str
+    audit_run_id: str
+    token: str
+    view_url: str
+    report_html_url: str
+    expires_at: datetime
+
+
+class AuditFailureItem(BaseModel):
+    code: str
+    element_guid: str | None = None
+    element_name: str | None = None
+    severity: str
+    message: str
+    fix_suggestion: str | None = None
+
+
+class AuditComparisonResponse(BaseModel):
+    base_audit_id: str
+    target_audit_id: str
+    score_delta: float
+    new_failures: list[AuditFailureItem]
+    resolved_failures: list[AuditFailureItem]
+    persistent_failures: list[AuditFailureItem]

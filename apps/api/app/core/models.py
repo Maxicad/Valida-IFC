@@ -110,6 +110,18 @@ class AuditRun(Base):
     error_message: Mapped[str | None] = mapped_column(Text)
 
 
+class AuditSnapshot(Base):
+    __tablename__ = "audit_snapshots"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=new_id)
+    audit_run_id: Mapped[str] = mapped_column(String, ForeignKey("audit_runs.id"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    created_by: Mapped[str | None] = mapped_column(String, ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
 class AuditResult(Base):
     __tablename__ = "audit_results"
 

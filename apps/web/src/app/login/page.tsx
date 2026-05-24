@@ -1,12 +1,42 @@
 "use client";
 
 import { ArrowRight, LockKeyhole, Mail, ShieldCheck, UserPlus } from "lucide-react";
+import Script from "next/script";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { apiPost, getStoredToken, setStoredToken } from "@/services/api";
 import type { TokenResponse, User } from "@/types/api";
+
+type GoogleCredentialResponse = {
+  credential?: string;
+};
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+            ux_mode?: "popup" | "redirect";
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              size?: "large" | "medium" | "small";
+              text?: "continue_with" | "signin_with";
+              theme?: "outline" | "filled_blue" | "filled_black";
+              width?: number;
+            },
+          ) => void;
+        };
+      };
+    };
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,12 +46,62 @@ export default function LoginPage() {
   const [password, setPassword] = useState("secret123");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleScriptReady, setGoogleScriptReady] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
+  const googleInitializedRef = useRef(false);
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
   useEffect(() => {
     if (getStoredToken()) {
       router.replace("/dashboard");
     }
   }, [router]);
+
+  const handleGoogleCredential = useCallback(
+    async (response: GoogleCredentialResponse) => {
+      if (!response.credential) {
+        setError("Nao foi possivel obter a credencial do Google.");
+        return;
+      }
+
+      setError(null);
+      setGoogleLoading(true);
+      try {
+        const token = await apiPost<TokenResponse>("/auth/google", { id_token: response.credential });
+        setStoredToken(token.access_token);
+        router.push("/dashboard");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Nao foi possivel autenticar com Google.");
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    [router],
+  );
+
+  const initializeGoogleLogin = useCallback(() => {
+    if (!googleClientId || !googleButtonRef.current || !window.google || googleInitializedRef.current) {
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: handleGoogleCredential,
+      ux_mode: "popup",
+    });
+    window.google.accounts.id.renderButton(googleButtonRef.current, {
+      theme: "outline",
+      size: "large",
+      text: "continue_with",
+      width: googleButtonRef.current.offsetWidth || 320,
+    });
+    googleInitializedRef.current = true;
+  }, [googleClientId, handleGoogleCredential]);
+
+  useEffect(() => {
+    initializeGoogleLogin();
+  }, [googleScriptReady, initializeGoogleLogin]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,6 +159,15 @@ export default function LoginPage() {
         </aside>
 
         <div className="px-6 py-7 lg:px-8 lg:py-9">
+          {googleClientId && (
+            <Script
+              onError={() => setError("Nao foi possivel carregar o login do Google.")}
+              onLoad={() => setGoogleScriptReady(true)}
+              src="https://accounts.google.com/gsi/client"
+              strategy="afterInteractive"
+            />
+          )}
+
           <div className="mb-6 flex rounded-md border border-line bg-surface p-1">
             <button
               className={`h-9 flex-1 rounded-md text-sm font-medium transition ${mode === "login" ? "bg-panel text-ink shadow-sm" : "text-ink/65 hover:text-ink"}`}
@@ -104,6 +193,21 @@ export default function LoginPage() {
               Use seu e-mail de trabalho para acessar projetos, criterios e auditorias.
             </p>
           </div>
+
+          {googleClientId && (
+            <div className="mb-5 space-y-4">
+              <div
+                aria-label="Entrar com Google"
+                className={`min-h-11 w-full ${googleLoading ? "pointer-events-none opacity-60" : ""}`}
+                ref={googleButtonRef}
+              />
+              <div className="flex items-center gap-3 text-xs uppercase text-ink/45">
+                <span className="h-px flex-1 bg-line" />
+                ou
+                <span className="h-px flex-1 bg-line" />
+              </div>
+            </div>
+          )}
 
           <form className="space-y-4" onSubmit={submit}>
             {mode === "register" && (

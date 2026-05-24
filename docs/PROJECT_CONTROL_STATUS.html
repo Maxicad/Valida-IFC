@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Valida IFC - Status do Projeto</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7f9;
+        --panel: #ffffff;
+        --line: #d6dde5;
+        --ink: #1e2a35;
+        --muted: #5f6e7d;
+        --ok: #2e7d4a;
+        --warn: #b88227;
+        --risk: #b84848;
+        --todo: #6a7783;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .header {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 20px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+      .muted {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .summary {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .kpi {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: #fbfcfd;
+      }
+      .kpi strong {
+        display: block;
+        font-size: 24px;
+      }
+      .table {
+        margin-top: 16px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+        vertical-align: top;
+      }
+      th {
+        background: #f1f5f8;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: #415160;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      .badge {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .done {
+        background: #d8f0df;
+        color: var(--ok);
+      }
+      .partial {
+        background: #fdf0d9;
+        color: var(--warn);
+      }
+      .todo {
+        background: #e7edf2;
+        color: var(--todo);
+      }
+      .risk {
+        color: var(--risk);
+        font-weight: 600;
+      }
+      .bar {
+        width: 180px;
+        height: 8px;
+        border-radius: 999px;
+        background: #e5ebf0;
+        overflow: hidden;
+      }
+      .bar > span {
+        display: block;
+        height: 100%;
+        background: #4d718c;
+      }
+      .links {
+        margin-top: 16px;
+        font-size: 14px;
+      }
+      a {
+        color: #325f84;
+      }
+      @media (max-width: 900px) {
+        .summary {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .bar {
+          width: 120px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <section class="header">
+        <h1>Status do Projeto - Valida IFC</h1>
+        <p class="muted">Snapshot em 2026-05-24 (America/Sao_Paulo)</p>
+        <p class="muted">Atualizacao manual solicitada em 2026-05-24 no in-app browser.</p>
+        <p class="muted">Rotina executada em 2026-05-24: Phase 9 atualizada; backend tests 27 passed; frontend lint/typecheck/build passed; E2E 6 passed; Google login desktop/mobile passed; piloto real 2 passed.</p>
+        <p class="muted">Marco atual: Versao Alfa / Phase 9 parcial; release docs, monitoramento, aceite automatizado com IFC real, rollback dry-run e Google login preparados, producao bloqueada por sign-off e rotacao/canal nominal.</p>
+        <p class="muted">Direcao de produto: validar primeiro a jornada de auditoria IFC; Quantitativos, IA, auditoria por linguagem natural, Clash e Sets ficam para pos-Alfa/Beta.</p>
+        <p class="muted">Fonte: validacao de codigo/testes local + checklist de controle.</p>
+        <div class="summary">
+          <div class="kpi">
+            <span>Fases concluidas</span>
+            <strong>9/10</strong>
+          </div>
+          <div class="kpi">
+            <span>Fases em andamento</span>
+            <strong>1/10</strong>
+          </div>
+          <div class="kpi">
+            <span>Fases nao iniciadas</span>
+            <strong>0/10</strong>
+          </div>
+          <div class="kpi">
+            <span>Qualidade atual</span>
+            <strong>Alfa partial</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="table">
+        <table>
+          <thead>
+            <tr>
+              <th>Fase</th>
+              <th>Status</th>
+              <th>Progresso</th>
+              <th>Pontos fortes</th>
+              <th>Pendencias criticas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Phase 0 - Governance and setup</td>
+              <td><span class="badge done">DONE</span></td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+              <td>Monorepo, docs, compose, bootstrap definidos.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Phase 1 - Core platform baseline</td>
+              <td><span class="badge done">DONE</span></td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+              <td>Frontend + API modular + worker scaffold + base de testes.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Phase 2 - Persistence and auth</td>
+              <td><span class="badge done">DONE</span></td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+              <td>Alembic, CRUD principal, auth JWT, protecao de rotas.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Phase 3 - IFC ingestion and criteria import</td>
+              <td><span class="badge done">DONE</span></td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+              <td>Upload IFC, FILE_SCHEMA, persistencia, importacao de criterios e validacao aprovados no gate completo.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Phase 4 - Audit engine and async processing</td>
+              <td><span class="badge done">DONE</span></td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+              <td>Engine, Redis/RQ worker real, status pending/running/completed/failed, polling, WebSocket, retry/dead-letter e persistencia detalhada validados.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Phase 5 - IFC viewer</td>
+              <td><span class="badge done">DONE</span></td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+              <td>Canvas real, loader web-ifc no browser, fallback backend, filtros, foco por GlobalId, lista clicavel, budget para modelos grandes e evidencia com IFC real de 85 MB.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Phase 6 - Simple UX and reporting polish</td>
+              <td><span class="badge done">DONE</span></td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+              <td>Relatorio HTML/PDF, modo rapido, copy simplificada, resumo executivo, timing test e print preview Chrome/Edge validados.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Phase 7 - Lightweight collaboration and project history</td>
+              <td><span class="badge done">DONE</span></td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+              <td>E2E/CI, snapshots read-only tokenizados, timeline de auditorias, comparacao entre execucoes e visual regression desktop/mobile validados.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Phase 8 - Pragmatic openBIM and essential hardening</td>
+              <td><span class="badge done">DONE</span></td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+              <td>IDS MVP, mapeamento para regras internas, fix guides, seguranca/lifecycle, load smoke e drill de observabilidade validados.</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Phase 9 - Release readiness</td>
+              <td><span class="badge partial">PARTIAL</span></td>
+              <td><div class="bar"><span style="width: 92%"></span></div></td>
+              <td>Checklist de release, guia de auditoria rapida, plano de monitoramento/suporte, registro de sign-off, gate tecnico, aceite automatizado com IFC real, rollback dry-run e Google login preparados.</td>
+              <td class="risk">Sign-off nominal e rotacao/canal de suporte ainda pendentes.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <p class="links">
+        Checklist detalhado:
+        <a href="./PROJECT_CONTROL_CHECKLIST.md">PROJECT_CONTROL_CHECKLIST.md</a>
+        <br />
+        Roadmap Alfa/Beta:
+        <a href="./ROADMAP.md">ROADMAP.md</a>
+        <br />
+        Release readiness:
+        <a href="./RELEASE_READINESS_CHECKLIST.md">RELEASE_READINESS_CHECKLIST.md</a>
+        <br />
+        Production GO blocker resolution:
+        <a href="./PRODUCTION_GO_BLOCKER_RESOLUTION.md">PRODUCTION_GO_BLOCKER_RESOLUTION.md</a>
+        <br />
+        Guia de auditoria rapida:
+        <a href="./USER_GUIDE_QUICK_AUDIT.md">USER_GUIDE_QUICK_AUDIT.md</a>
+        <br />
+        Monitoramento pos-go-live:
+        <a href="./POST_GO_LIVE_MONITORING.md">POST_GO_LIVE_MONITORING.md</a>
+        <br />
+        Registro de sign-off:
+        <a href="./SIGN_OFF_REGISTER.md">SIGN_OFF_REGISTER.md</a>
+        <br />
+        Referencia de direcionamento:
+        <a href="./DATAOCTOPUS_VS_VALIDA_IFC.html">DATAOCTOPUS_VS_VALIDA_IFC.html</a>
+      </p>
+    </div>
+  </body>
+</html>

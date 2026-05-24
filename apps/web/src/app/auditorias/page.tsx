@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, FileText, Loader2, Play, RefreshCcw, XCircle } from "lucide-react";
+import { CheckCircle2, FileText, Loader2, Play, RefreshCcw, Sparkles, XCircle } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
@@ -23,6 +23,23 @@ function statusTone(status: string): string {
   return "bg-steel/10 text-steel";
 }
 
+function dateValue(value?: string | null): number {
+  const timestamp = value ? new Date(value).getTime() : 0;
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function newestProject(projects: Project[]): Project | undefined {
+  return [...projects].sort((a, b) => dateValue(b.updated_at) - dateValue(a.updated_at))[0];
+}
+
+function newestIfcFile(ifcFiles: IfcFile[]): IfcFile | undefined {
+  return [...ifcFiles].sort((a, b) => dateValue(b.uploaded_at) - dateValue(a.uploaded_at))[0];
+}
+
+function newestCriteriaSet(criteriaSets: CriteriaSet[]): CriteriaSet | undefined {
+  return [...criteriaSets].sort((a, b) => dateValue(b.updated_at) - dateValue(a.updated_at))[0];
+}
+
 export default function AuditsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [ifcFiles, setIfcFiles] = useState<IfcFile[]>([]);
@@ -40,6 +57,34 @@ export default function AuditsPage() {
 
   const summaryRows = useMemo(() => auditResults.filter((result) => result.is_summary), [auditResults]);
   const elementRows = useMemo(() => auditResults.filter((result) => !result.is_summary), [auditResults]);
+  const selectedProject = useMemo(
+    () => projects.find((project) => project.id === selectedProjectId),
+    [projects, selectedProjectId],
+  );
+  const selectedIfcFile = useMemo(
+    () => ifcFiles.find((ifcFile) => ifcFile.id === selectedIfcFileId),
+    [ifcFiles, selectedIfcFileId],
+  );
+  const selectedCriteriaSet = useMemo(
+    () => criteriaSets.find((criteriaSet) => criteriaSet.id === selectedCriteriaSetId),
+    [criteriaSets, selectedCriteriaSetId],
+  );
+  const quickModeReady = Boolean(selectedProject && selectedIfcFile && selectedCriteriaSet);
+  const quickModeMessage = useMemo(() => {
+    if (loadingData) {
+      return "Carregando as opcoes mais recentes...";
+    }
+    if (!selectedProject) {
+      return "Cadastre um projeto para liberar a auditoria rapida.";
+    }
+    if (!selectedIfcFile) {
+      return "Envie um IFC para este projeto antes de executar.";
+    }
+    if (!selectedCriteriaSet) {
+      return "Importe ou cadastre criterios antes de executar.";
+    }
+    return "Pronto para executar com os dados mais recentes.";
+  }, [loadingData, selectedCriteriaSet, selectedIfcFile, selectedProject]);
 
   async function loadInitialData() {
     setLoadingData(true);
@@ -51,8 +96,14 @@ export default function AuditsPage() {
       ]);
       setProjects(loadedProjects);
       setCriteriaSets(loadedCriteriaSets);
-      setSelectedProjectId((current) => current || loadedProjects[0]?.id || "");
-      setSelectedCriteriaSetId((current) => current || loadedCriteriaSets[0]?.id || "");
+      setSelectedProjectId((current) =>
+        loadedProjects.some((project) => project.id === current) ? current : newestProject(loadedProjects)?.id || "",
+      );
+      setSelectedCriteriaSetId((current) =>
+        loadedCriteriaSets.some((criteriaSet) => criteriaSet.id === current)
+          ? current
+          : newestCriteriaSet(loadedCriteriaSets)?.id || "",
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nao foi possivel carregar dados de auditoria.");
     } finally {
@@ -70,7 +121,9 @@ export default function AuditsPage() {
     try {
       const files = await apiGet<IfcFile[]>(`/projects/${projectId}/ifc-files`);
       setIfcFiles(files);
-      setSelectedIfcFileId((current) => current || files[0]?.id || "");
+      setSelectedIfcFileId((current) =>
+        files.some((ifcFile) => ifcFile.id === current) ? current : newestIfcFile(files)?.id || "",
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nao foi possivel carregar arquivos IFC.");
     }
@@ -158,7 +211,7 @@ export default function AuditsPage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-steel">Execucao de Regras</p>
             <h1 className="mt-1 text-2xl font-semibold text-ink">Auditorias IFC</h1>
             <p className="mt-2 max-w-2xl text-sm text-ink/65">
-              Selecione um arquivo e um conjunto de criterios para processar a auditoria de forma assincrona.
+              Execute a auditoria com os dados mais recentes ou ajuste a selecao quando precisar.
             </p>
           </div>
           <Button onClick={() => void loadInitialData()} type="button" variant="secondary">
@@ -172,60 +225,35 @@ export default function AuditsPage() {
 
       <section className="mt-4 grid gap-4 lg:grid-cols-[420px_1fr]">
         <Card className="p-4 md:p-5">
-          <h2 className="text-lg font-semibold text-ink">Nova auditoria</h2>
-          <p className="mt-1 text-sm text-ink/60">Escolha o escopo antes de enviar para processamento.</p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-ink">Auditoria rapida</h2>
+              <p className="mt-1 text-sm text-ink/60">{quickModeMessage}</p>
+            </div>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-steel/20 bg-steel/10 text-steel">
+              <Sparkles className="h-4 w-4" />
+            </span>
+          </div>
 
           <form className="mt-4 space-y-4" onSubmit={runAudit}>
-            <label className="block text-sm font-medium text-ink/90">
-              Projeto
-              <select
-                className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
-                onChange={(event) => {
-                  setSelectedProjectId(event.target.value);
-                  setSelectedIfcFileId("");
-                }}
-                value={selectedProjectId}
-              >
-                <option value="">Selecione</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block text-sm font-medium text-ink/90">
-              Arquivo IFC
-              <select
-                className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
-                onChange={(event) => setSelectedIfcFileId(event.target.value)}
-                value={selectedIfcFileId}
-              >
-                <option value="">Selecione</option>
-                {ifcFiles.map((ifcFile) => (
-                  <option key={ifcFile.id} value={ifcFile.id}>
-                    {ifcFile.file_name} ({ifcFile.ifc_schema ?? "sem schema"})
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block text-sm font-medium text-ink/90">
-              Conjunto de criterios
-              <select
-                className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
-                onChange={(event) => setSelectedCriteriaSetId(event.target.value)}
-                value={selectedCriteriaSetId}
-              >
-                <option value="">Selecione</option>
-                {criteriaSets.map((criteriaSet) => (
-                  <option key={criteriaSet.id} value={criteriaSet.id}>
-                    {criteriaSet.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="rounded-md border border-line bg-surface p-3">
+              <dl className="space-y-3 text-sm">
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-ink/55">Projeto</dt>
+                  <dd className="mt-1 truncate font-medium text-ink">{selectedProject?.name ?? "Nenhum projeto"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-ink/55">Arquivo IFC</dt>
+                  <dd className="mt-1 truncate font-medium text-ink">
+                    {selectedIfcFile ? `${selectedIfcFile.file_name} (${selectedIfcFile.ifc_schema ?? "sem schema"})` : "Nenhum IFC"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-ink/55">Criterios</dt>
+                  <dd className="mt-1 truncate font-medium text-ink">{selectedCriteriaSet?.name ?? "Nenhum conjunto"}</dd>
+                </div>
+              </dl>
+            </div>
 
             {statusMessage && (
               <p className="rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink/80">
@@ -234,10 +262,70 @@ export default function AuditsPage() {
               </p>
             )}
 
-            <Button className="w-full" disabled={loading || loadingData} type="submit">
+            <Button className="w-full" disabled={loading || loadingData || !quickModeReady} type="submit">
               <Play className="h-4 w-4" />
               {loading ? "Processando..." : "Executar auditoria"}
             </Button>
+
+            <div className="rounded-md border border-line p-3">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3 className="text-sm font-semibold text-ink">Ajustes opcionais</h3>
+                <span className="text-xs font-medium text-ink/55">Defaults: mais recentes</span>
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-ink/90">
+                  Projeto
+                  <select
+                    className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
+                    onChange={(event) => {
+                      setSelectedProjectId(event.target.value);
+                      setSelectedIfcFileId("");
+                    }}
+                    value={selectedProjectId}
+                  >
+                    <option value="">Selecione</option>
+                    {projects.map((project) => (
+                      <option key={project.id} value={project.id}>
+                        {project.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="block text-sm font-medium text-ink/90">
+                  Arquivo IFC
+                  <select
+                    className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
+                    onChange={(event) => setSelectedIfcFileId(event.target.value)}
+                    value={selectedIfcFileId}
+                  >
+                    <option value="">Selecione</option>
+                    {ifcFiles.map((ifcFile) => (
+                      <option key={ifcFile.id} value={ifcFile.id}>
+                        {ifcFile.file_name} ({ifcFile.ifc_schema ?? "sem schema"})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="block text-sm font-medium text-ink/90">
+                  Conjunto de criterios
+                  <select
+                    className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
+                    onChange={(event) => setSelectedCriteriaSetId(event.target.value)}
+                    value={selectedCriteriaSetId}
+                  >
+                    <option value="">Selecione</option>
+                    {criteriaSets.map((criteriaSet) => (
+                      <option key={criteriaSet.id} value={criteriaSet.id}>
+                        {criteriaSet.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </div>
           </form>
         </Card>
 
