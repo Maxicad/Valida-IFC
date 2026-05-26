@@ -4,6 +4,18 @@
 
 ---
 
+## Atualizacao de escopo - 2026-05-26
+
+O escopo foi reorganizado para separar claramente Alfa, Beta e futuro:
+
+- Alfa: criterios BIM em CSV/TXT/XLS/XLSX e IDS MVP, pontuacao por criticidade, relatorio tecnico pronto para entrega, visualizacao 3D de inconformidades por elemento/GlobalId e fluxo leve para auditor BIM sem depender de Solibri/Revit como runtime.
+- Beta/pos-Alfa: BCF, IDS ampliado, API publica e self-host, iniciados somente apos validacao da Alfa, sign-off e suporte nominal.
+- Fora da Alfa: IA, solicitacao de auditoria por linguagem natural, clash detection, search sets/viewpoints avancados e colaboracao complexa.
+
+Documento de planejamento detalhado: `docs/PRODUCT_SCOPE_PHASE_MAPPING.md`.
+
+---
+
 ## 1. Visão geral do produto
 
 O **Valida IFC** será uma aplicação web para validar arquivos IFC com base em critérios configuráveis de auditoria BIM/openBIM.
@@ -14,9 +26,9 @@ O sistema deverá permitir:
 - Cadastro de projetos.
 - Upload de arquivos IFC.
 - Extração de metadados do IFC, incluindo versão/schema.
-- Importação de critérios em `.txt`, `.csv`, `.xls` e `.xlsx`.
+- Importação de critérios em `.txt`, `.csv`, `.xls`, `.xlsx` e IDS MVP.
 - Criação manual de critérios.
-- Criação assistida de critérios por linguagem natural.
+- Criação assistida de critérios por linguagem natural em fase Beta/pos-Alfa, sempre com revisão humana.
 - Execução de auditoria automática.
 - Classificação das inconformidades por criticidade: **baixa**, **moderada** e **alta**.
 - Cálculo de percentual de conformidade ponderado pela criticidade.
@@ -24,7 +36,7 @@ O sistema deverá permitir:
 - Aplicação de cores nos elementos aprovados, reprovados e não avaliados.
 - Geração de relatório em tela.
 - Impressão do relatório.
-- Exportação futura em PDF, CSV e XLSX.
+- Exportação futura em CSV/XLSX para analises complementares e BCF para interoperabilidade.
 
 ---
 
@@ -662,10 +674,11 @@ Saídas:
 ```text
 Visualização HTML
 Impressão pelo navegador
-PDF em fase futura
-CSV em fase futura
-XLSX em fase futura
-BCF em fase futura
+PDF na Alfa
+Snapshot/evidencia somente leitura na Alfa
+CSV em fase Beta/pos-Alfa
+XLSX em fase Beta/pos-Alfa
+BCF em Phase 10/Beta
 ```
 
 ---
@@ -949,72 +962,80 @@ def calculate_score(results):
 
 ## 12. Prioridade de desenvolvimento
 
-### Fase 1 — MVP base
+### Fase 0 — Governanca e setup
 
-- [ ] Criar monorepo.
-- [ ] Criar frontend Next.js.
-- [ ] Criar backend FastAPI.
-- [ ] Criar banco PostgreSQL.
-- [ ] Criar autenticação simples.
-- [ ] Criar CRUD de projetos.
-- [ ] Criar upload IFC.
-- [ ] Ler `FILE_SCHEMA`.
-- [ ] Exibir versão IFC na interface.
-- [ ] Importar critérios CSV.
-- [ ] Criar motor básico de auditoria.
-- [ ] Calcular percentual por criticidade.
-- [ ] Exibir relatório em HTML.
-- [ ] Permitir impressão do relatório.
+- [x] Criar monorepo, documentacao base, Compose e estrutura de trabalho.
 
-### Fase 2 — Auditoria IFC ampliada
+### Fase 1 — Plataforma base
 
-- [ ] Validar existência de entidades.
-- [ ] Validar propriedades.
-- [ ] Validar propriedades vazias.
-- [ ] Validar GlobalId duplicado.
-- [ ] Validar estrutura espacial.
-- [ ] Validar classificação.
-- [ ] Gerar resultado por elemento.
-- [ ] Associar resultado ao GlobalId.
+- [x] Criar frontend Next.js, backend FastAPI, worker scaffold, pacotes compartilhados e base de testes.
 
-### Fase 3 — Visualizador IFC
+### Fase 2 — Persistencia e autenticacao
 
-- [ ] Integrar viewer IFC no frontend.
-- [ ] Carregar arquivo IFC.
-- [ ] Selecionar elementos.
-- [ ] Exibir propriedades.
-- [ ] Colorir elementos por status.
-- [ ] Filtrar por criticidade.
-- [ ] Isolar elementos reprovados.
-- [ ] Sincronizar tabela de inconformidades com modelo 3D.
+- [x] Criar banco PostgreSQL, Alembic, CRUD principal, login, JWT e rotas protegidas.
 
-### Fase 4 — Linguagem natural
+### Fase 3 — Ingestao IFC e criterios BIM
 
-- [ ] Criar campo para critério em linguagem natural.
-- [ ] Gerar regra estruturada.
-- [ ] Mostrar prévia para revisão.
-- [ ] Salvar regra aprovada.
-- [ ] Guardar texto original.
-- [ ] Criar histórico de critérios gerados.
+- [x] Criar upload IFC.
+- [x] Ler `FILE_SCHEMA`.
+- [x] Importar criterios CSV/TXT/XLS/XLSX.
+- [x] Validar criticidade, tipo de regra, operador e campos obrigatorios.
+- [x] Calcular percentual ponderado por criticidade.
 
-### Fase 5 — Relatórios avançados
+### Fase 4 — Motor de auditoria e processamento assincrono
 
-- [ ] Gerar PDF.
-- [ ] Exportar CSV.
-- [ ] Exportar XLSX.
-- [ ] Criar resumo executivo.
-- [ ] Criar relatório por criticidade.
-- [ ] Criar relatório por elemento.
-- [ ] Criar comparativo entre versões do IFC.
+- [x] Executar regras de auditoria.
+- [x] Persistir resultado por criterio.
+- [x] Persistir resultado por elemento/GlobalId quando aplicavel.
+- [x] Processar auditorias pesadas via worker.
+- [x] Registrar falhas e estado da fila.
 
-### Fase 6 — openBIM avançado
+### Fase 5 — Visualizador IFC
+
+- [x] Integrar viewer IFC no frontend.
+- [x] Carregar arquivo IFC real.
+- [x] Selecionar e focar elementos por GlobalId.
+- [x] Colorir elementos por status/criticidade.
+- [x] Filtrar por status, criticidade, codigo de criterio e GlobalId.
+- [x] Sincronizar tabela de inconformidades com modelo 3D.
+
+### Fase 6 — UX leve e relatorio tecnico
+
+- [x] Criar fluxo rapido para auditor BIM.
+- [x] Gerar relatorio HTML/PDF com resumo executivo.
+- [x] Criar relatorio por criticidade e por elemento.
+- [x] Incluir sugestoes de correcao e evidencia para entrega.
+- [x] Validar impressao/preview do relatorio.
+
+### Fase 7 — Evidencia compartilhavel e historico
+
+- [x] Criar snapshots somente leitura.
+- [x] Criar historico por projeto.
+- [x] Criar comparativo entre execucoes do IFC.
+- [x] Manter colaboracao leve, sem workflow complexo de aprovacao.
+
+### Fase 8 — openBIM pragmatico e hardening
+
+- [x] Importar requisitos IDS MVP.
+- [x] Converter IDS para regras internas nos casos comuns.
+- [x] Criar guias de correcao por template.
+- [x] Validar seguranca, lifecycle de storage, carga basica e observabilidade.
+
+### Fase 9 — Release Alfa
+
+- [x] Criar checklist de release, guia de auditoria rapida, rollback dry-run e aceite automatizado com IFC real.
+- [ ] Registrar sign-off do stakeholder.
+- [ ] Definir suporte primario, backup e canal de notificacao.
+- [ ] Fechar documentacao publica de seguranca/LGPD/retencao/responsabilidade tecnica.
+
+### Fase 10 — Beta openBIM, API e self-host
 
 - [ ] Exportar inconformidades em BCF.
-- [ ] Importar requisitos IDS.
-- [ ] Exportar critérios como IDS, quando aplicável.
-- [ ] Integrar bSDD.
-- [ ] Criar API pública para auditoria externa.
-- [ ] Integrar com CDE futuramente.
+- [ ] Ampliar suporte IDS e exportar criterios como IDS quando aplicavel.
+- [ ] Criar API publica versionada para auditoria externa.
+- [ ] Empacotar modo self-host com guia de deploy, backup, monitoramento e rollback.
+- [ ] Integrar bSDD/CDE apenas se houver demanda validada.
+- [ ] Avaliar IA, linguagem natural, clash detection e search sets somente apos validacao da Alfa.
 
 ---
 

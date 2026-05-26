@@ -18,6 +18,21 @@ A Versao Alfa so deve ser considerada validada quando houver evidencia com usuar
 - emissao/compartilhamento de evidencia;
 - aceite ou rejeicao documentada pelo usuario piloto.
 
+## Mapeamento dos itens estrategicos propostos
+
+Este roadmap passa a tratar os itens abaixo como trilhas explicitas de produto, com fronteira clara entre Alfa e Beta:
+
+| Item | Onde entra | Fase tecnica | Decisao |
+| --- | --- | --- | --- |
+| Criterios BIM em CSV/XLS/IDS | Entrada de requisitos BIM para auditoria | CSV/TXT/XLS/XLSX na Fase 3; IDS MVP na Fase 8; IDS ampliado/exportavel na Beta | Alfa inclui importacao atual e IDS MVP; cobertura completa de IDS nao bloqueia Alfa |
+| Pontuacao por criticidade | Decisao tecnica ponderada, nao apenas pass/fail | Fases 3, 4 e 6 | Alfa obrigatoria; deve aparecer no resultado e no relatorio |
+| Relatorio tecnico pronto para entrega | Evidencia auditavel para coordenador BIM/cliente | Fases 6, 7 e 9 | Alfa obrigatoria; UAT e sign-off confirmam prontidao de entrega |
+| Visualizacao 3D com inconformidades por elemento | Inspecao espacial por GlobalId e filtros | Fase 5 | Alfa obrigatoria, mas como aprofundamento a partir do resultado, sem pesar o fluxo rapido |
+| Fluxo leve para auditor BIM, sem depender de Solibri/Revit | Caminho web curto para validar IFC e gerar evidencia | Fases 6 e 9 | Alfa obrigatoria; Revit/Archicad podem aparecer em guias de correcao, mas nao como dependencia |
+| Futuro BCF/IDS/API/self-host | Interoperabilidade, automacao e modelo de implantacao | Fase 10 proposta / Beta pos-Alfa | Fora do GO da Alfa; iniciar somente apos validacao de uso e suporte |
+
+O detalhamento operacional fica em `docs/PRODUCT_SCOPE_PHASE_MAPPING.md`.
+
 ## Versao Alfa - escopo planejado
 
 Objetivo: entregar o menor produto confiavel para auditoria IFC, com baixa friccao de entrada e evidencia tecnica rastreavel.
@@ -101,6 +116,9 @@ Objetivo: adicionar produtividade BIM e automacao apos a validacao do uso princi
 
 - API publica versionada.
 - bSDD.
+- BCF export/import conforme necessidade real do piloto.
+- Suporte IDS ampliado, incluindo exportacao de criterios como IDS quando aplicavel.
+- Self-host empacotado com guia de deploy, backup, monitoramento e suporte.
 - Colaboracao mais rica somente se o piloto comprovar necessidade.
 
 ## Mapeamento das fases tecnicas existentes
@@ -140,3 +158,11 @@ Objetivo: adicionar produtividade BIM e automacao apos a validacao do uso princi
 
 - IDS MVP na Alfa.
 - BCF, bSDD e API publica planejados para pos-Alfa/Beta conforme validacao.
+
+### Fase 10 - Beta openBIM, API e self-host
+
+- Exportacao BCF de inconformidades por GlobalId, com titulo, descricao, severidade e evidencia minima.
+- IDS ampliado e exportacao de criterios como IDS quando houver aderencia semantica.
+- API publica versionada para execucao externa de auditorias.
+- Empacotamento self-host com Compose/infra, runbook, backup/restore, monitoramento e matriz de suporte.
+- bSDD, CDE e integracoes externas apenas se houver demanda validada no piloto/Beta.

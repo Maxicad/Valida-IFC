@@ -12,7 +12,15 @@ O relatorio HTML deve conter:
 - Elementos afetados com GlobalId.
 - Mensagem, valor encontrado, valor esperado e sugestao de correcao.
 
-## Saidas
+## Saidas Alfa
 
-- HTML e impressao pelo navegador no MVP.
-- PDF, CSV, XLSX e BCF em fases futuras.
+- HTML.
+- PDF.
+- Impressao pelo navegador.
+- Snapshot/evidencia somente leitura quando aplicavel.
+
+## Saidas Beta/pos-Alfa
+
+- CSV/XLSX para exportacoes complementares.
+- BCF para inconformidades por GlobalId quando houver necessidade de interoperabilidade.
+- Entregas via API publica quando Phase 10 for iniciada.

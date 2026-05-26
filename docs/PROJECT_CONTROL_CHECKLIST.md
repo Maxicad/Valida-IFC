@@ -1,12 +1,13 @@
 # Project Control Checklist - Valida IFC
 
-Last update: 2026-05-24
+Last update: 2026-05-26
 Reference timezone: America/Sao_Paulo
 Owner: Product + Engineering
 Last manual status refresh: 2026-05-24 (user requested in-app status review)
-Last daily routine execution: 2026-05-24 (Phase 9 Google login gate: backend tests 27 passed; frontend lint/typecheck/build passed; Google login E2E desktop/mobile passed; full E2E 6 passed)
+Last daily routine execution: 2026-05-25 (backend tests 28 passed; frontend lint/typecheck/build passed; interface smoke web routes 200 after next dev cache reset)
 Current milestone: Versao Alfa / Phase 9 partially complete; release docs, monitoring plan, real pilot automated acceptance, rollback dry-run and Google login prepared, production GO blocked by stakeholder sign-off and named support rotation/channel.
 Strategy update (IFC Tools vs Valida IFC): prioritize the audit evidence journey in Alfa; defer quantities, IA, natural-language audit requests, clash and sets until after Alfa validation.
+Scope mapping update 2026-05-26: BIM criteria in CSV/XLS/IDS, severity scoring, delivery-ready report, 3D element nonconformity inspection and lightweight BIM auditor flow are Alfa scope; BCF, broader IDS, public API and self-host are Phase 10/Beta candidates after Alfa validation.
 
 ## How to use this artifact
 
@@ -31,7 +32,7 @@ Strategy update (IFC Tools vs Valida IFC): prioritize the audit evidence journey
 
 ---
 
-## Status snapshot (estimated from repository state on 2026-05-24)
+## Status snapshot (estimated from repository state on 2026-05-26)
 
 - Phase 0: DONE
 - Phase 1: DONE
@@ -43,12 +44,16 @@ Strategy update (IFC Tools vs Valida IFC): prioritize the audit evidence journey
 - Phase 7: DONE
 - Phase 8: DONE
 - Phase 9: PARTIAL
+- Phase 10: NOT STARTED
 - Product release: Alfa PARTIAL, Beta NOT STARTED
 
 ---
 
 ## Simplicity and efficiency guardrails
 
+- [x] Keep `docs/PRODUCT_SCOPE_PHASE_MAPPING.md` as the product-scope map for current strategic items.
+- [x] Treat CSV/XLS criteria import, IDS MVP, severity scoring, report, viewer and quick audit as Alfa audit-evidence scope.
+- [x] Keep BCF, full IDS coverage, public API and self-host packaging out of Alfa production GO.
 - [x] Keep the core journey obvious: Upload IFC -> Select rules -> Run audit -> See result -> Share evidence.
 - [x] Prefer one clear path over many parallel options on first use.
 - [x] Defer heavyweight platform features unless they directly reduce user effort now.
@@ -69,6 +74,12 @@ Strategy update (IFC Tools vs Valida IFC): prioritize the audit evidence journey
 
 Purpose: validate the real user value of IFC audit evidence before adding productivity features.
 
+- [x] BIM criteria import through CSV/TXT/XLS/XLSX for spreadsheet-based BIM requirements.
+- [x] IDS MVP import for common entity/property/value validation cases.
+- [x] Severity-based scoring with low, moderate and high weights.
+- [x] Delivery-ready technical report with executive summary, details, fixes and affected elements.
+- [x] 3D viewer inspection of nonconformities by element/GlobalId.
+- [x] Lightweight browser flow for BIM auditors, independent of Solibri/Revit as runtime dependencies.
 - [x] Core audit journey: upload IFC -> select/import criteria -> run audit -> inspect result -> share evidence.
 - [x] Fast audit mode with clear defaults.
 - [x] Real IFC viewer connected to audit results.
@@ -100,6 +111,10 @@ Purpose: validate the real user value of IFC audit evidence before adding produc
 
 ### Versao Beta - planned scope
 
+- [ ] BCF export for nonconformities if pilot/Beta confirms collaboration need.
+- [ ] Broader IDS coverage and optional export of internal criteria as IDS where semantics match.
+- [ ] Public API for external audit execution, with versioning, auth and rate/usage controls.
+- [ ] Self-host packaging with deployment guide, backup/restore, monitoring and support matrix.
 - [ ] Quantities by IFC type, level, discipline and audit status.
 - [ ] CSV/XLSX export for quantities.
 - [ ] IA assistant for explaining failures, summarizing reports and suggesting corrections.
@@ -616,6 +631,9 @@ Decision: GO
   - `PILOT_IFC_PATH=C:\MaxiCAD_Projetos_IA\Valida-IFC\samples\ifc\SALE-MET-EX-9001-TOR1-GERL-R01.ifc corepack pnpm --filter @valida-ifc/web e2e e2e/pilot-acceptance.spec.ts` (2 passed: real IFC upload, criterios, auditoria rapida, viewer and report on desktop/mobile)
 - Pilot interface evidence stored under `docs/evidence/phase9-2026-05-24/pilot-acceptance/`.
 - Google login evidence stored under `docs/evidence/phase9-2026-05-24/google-login/`.
+- Google login gate revalidated on 2026-05-24:
+  - `NEXT_PUBLIC_GOOGLE_CLIENT_ID=google-alpha-client corepack pnpm --filter @valida-ifc/web e2e e2e/google-login.spec.ts --project chromium-desktop` (1 passed)
+  - `NEXT_PUBLIC_GOOGLE_CLIENT_ID=google-alpha-client corepack pnpm --filter @valida-ifc/web e2e e2e/google-login.spec.ts --project chromium-mobile` (1 passed)
 - Rollback dry-run evidence stored under `docs/evidence/phase9-2026-05-24/rollback-dry-run/`.
 - Production GO blocker resolution packet stored at `docs/PRODUCTION_GO_BLOCKER_RESOLUTION.md`.
 - Open production GO blockers:
@@ -624,6 +642,52 @@ Decision: GO
 - Evidence artifact: `docs/evidence/phase9-2026-05-24/RESULTS.md`.
 
 Decision: PARTIAL / NO-GO for production
+
+### Evidence - 2026-05-25 daily control routine
+
+- Validation executed:
+  - `corepack pnpm --filter @valida-ifc/web lint` (passed)
+  - `corepack pnpm --filter @valida-ifc/web typecheck` (passed; first run failed before `.next` types existed, rerun passed after build)
+  - `corepack pnpm --filter @valida-ifc/web build` (passed)
+  - `docker compose run --rm --no-deps api pytest apps/api/tests -q` (28 passed)
+- Interface smoke (desktop routes) executed with HTTP 200:
+  - `/login`, `/dashboard`, `/projetos`, `/projetos/upload`, `/criterios`, `/auditorias`, `/visualizador`, `/relatorios`
+- Operational note:
+  - `next dev` cache/chunk instability reappeared (`Cannot find module './443.js'`) during smoke checks.
+  - Mitigation used in routine: stop dev server, remove `apps/web/.next`, restart dev server.
+  - Status after mitigation: interface smoke returned to 200 on all core routes.
+- Phase status impact:
+  - No phase moved. Phase 9 remains PARTIAL because GO blockers are non-technical (stakeholder sign-off and named support rotation/channel).
+
+---
+
+## Phase 10 - Beta openBIM extensions and deployment model
+
+### Scope checklist
+- [ ] Start only after Phase 9 closes with stakeholder sign-off and support rotation/channel active.
+- [ ] Export nonconformities as BCF with GlobalId, title, description, severity, rule code and evidence reference.
+- [ ] Expand IDS support beyond the MVP subset based on pilot files and user demand.
+- [ ] Export applicable internal criteria as IDS while preserving unsupported-rule warnings.
+- [ ] Create a public API contract for external audit execution.
+- [ ] Add API auth, versioning, usage limits and operational observability for public/API-driven use.
+- [ ] Package self-host deployment with Docker/Compose or equivalent production profile.
+- [ ] Document self-host backup, restore, update, rollback, monitoring and support responsibility.
+- [ ] Evaluate bSDD, CDE integrations, clash, search sets, quantities and IA only when Beta evidence shows demand.
+
+### Validation and tests (mandatory gate)
+- [ ] Backend tests cover BCF/IDS/API/self-host configuration paths introduced in the phase.
+- [ ] Frontend lint/typecheck/build pass.
+- [ ] Full system test: API-driven or self-hosted audit flow runs from upload/criteria to viewer/report.
+- [ ] Interface test: Beta additions do not add friction to the Alfa quick audit journey.
+- [ ] Deployment test: self-host package can be installed, backed up, restored and rolled back from documented steps.
+- [ ] Interoperability test: BCF/IDS artifacts open or validate in at least one independent compatible tool when applicable.
+
+### Open risks
+- BCF and full IDS semantics can expand scope quickly; keep the first Beta slice export-focused and evidence-driven.
+- Self-host creates support obligations; do not ship it without named owner, update path and rollback path.
+- Public API changes operational risk; require observability, auth and rate/usage controls before pilot exposure.
+
+Decision: NOT STARTED / WAITING FOR ALFA VALIDATION
 
 ---
 

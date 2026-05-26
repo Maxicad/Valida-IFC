@@ -1,6 +1,7 @@
 # TODO
 
-- Ativar `pnpm` com Corepack e instalar dependencias.
-- Instalar/configurar Python local ou executar backend via Docker.
-- Ampliar motor de auditoria com IfcOpenShell para regras profundas de propriedades, geometria e classificacao.
-- Integrar viewer IFC.
+- Fechar Phase 9: registrar stakeholder sign-off em `docs/SIGN_OFF_REGISTER.md`.
+- Fechar Phase 9: definir suporte primario, backup e canal de notificacao em `docs/POST_GO_LIVE_MONITORING.md`.
+- Publicar/documentar pagina de seguranca, LGPD, retencao de arquivos e responsabilidade tecnica.
+- Manter a Alfa focada em criterios CSV/XLS/IDS MVP, score por criticidade, relatorio tecnico, viewer por elemento e fluxo leve para auditor BIM.
+- So iniciar Phase 10/Beta depois da validacao da Alfa: BCF, IDS ampliado, API publica e self-host.

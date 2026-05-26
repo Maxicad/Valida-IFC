@@ -27,6 +27,8 @@ Campos canonicos:
 - `moderada`: peso 3.
 - `alta`: peso 5.
 
+O score da Alfa deve ser ponderado por esses pesos e mostrado de forma rastreavel no resultado da auditoria e no relatorio tecnico.
+
 ## Regras iniciais
 
 - `ifc_schema`
@@ -41,3 +43,8 @@ Campos canonicos:
 - `spatial_structure_check`
 - `globalid_unique`
 - `geometry_exists`
+
+## Entradas de criterios
+
+- Alfa: CSV, TXT, XLS, XLSX e IDS/XML MVP para casos comuns.
+- Beta/pos-Alfa: IDS ampliado e exportacao de criterios como IDS quando houver correspondencia semantica segura.

@@ -147,24 +147,25 @@
     <div class="wrap">
       <section class="header">
         <h1>Status do Projeto - Valida IFC</h1>
-        <p class="muted">Snapshot em 2026-05-24 (America/Sao_Paulo)</p>
+        <p class="muted">Snapshot em 2026-05-26 (America/Sao_Paulo)</p>
         <p class="muted">Atualizacao manual solicitada em 2026-05-24 no in-app browser.</p>
-        <p class="muted">Rotina executada em 2026-05-24: Phase 9 atualizada; backend tests 27 passed; frontend lint/typecheck/build passed; E2E 6 passed; Google login desktop/mobile passed; piloto real 2 passed.</p>
+        <p class="muted">Rotina executada em 2026-05-25: backend tests 28 passed; frontend lint/typecheck/build passed; smoke de interface desktop (8 rotas) com HTTP 200 apos reset de cache `.next` do next dev.</p>
         <p class="muted">Marco atual: Versao Alfa / Phase 9 parcial; release docs, monitoramento, aceite automatizado com IFC real, rollback dry-run e Google login preparados, producao bloqueada por sign-off e rotacao/canal nominal.</p>
-        <p class="muted">Direcao de produto: validar primeiro a jornada de auditoria IFC; Quantitativos, IA, auditoria por linguagem natural, Clash e Sets ficam para pos-Alfa/Beta.</p>
+        <p class="muted">Direcao de produto: validar primeiro a jornada de auditoria IFC; criterios CSV/XLS/IDS MVP, score por criticidade, relatorio tecnico, viewer por elemento e fluxo leve ficam na Alfa.</p>
+        <p class="muted">BCF, IDS ampliado, API publica e self-host ficam para Phase 10/Beta, apos validacao da Alfa e definicao de suporte.</p>
         <p class="muted">Fonte: validacao de codigo/testes local + checklist de controle.</p>
         <div class="summary">
           <div class="kpi">
             <span>Fases concluidas</span>
-            <strong>9/10</strong>
+            <strong>9/11</strong>
           </div>
           <div class="kpi">
             <span>Fases em andamento</span>
-            <strong>1/10</strong>
+            <strong>1/11</strong>
           </div>
           <div class="kpi">
             <span>Fases nao iniciadas</span>
-            <strong>0/10</strong>
+            <strong>1/11</strong>
           </div>
           <div class="kpi">
             <span>Qualidade atual</span>
@@ -255,6 +256,13 @@
               <td>Checklist de release, guia de auditoria rapida, plano de monitoramento/suporte, registro de sign-off, gate tecnico, aceite automatizado com IFC real, rollback dry-run e Google login preparados.</td>
               <td class="risk">Sign-off nominal e rotacao/canal de suporte ainda pendentes.</td>
             </tr>
+            <tr>
+              <td>Phase 10 - Beta openBIM extensions and deployment model</td>
+              <td><span class="badge todo">NOT STARTED</span></td>
+              <td><div class="bar"><span style="width: 0%"></span></div></td>
+              <td>Escopo candidato mapeado: BCF, IDS ampliado, API publica, self-host, bSDD e integracoes conforme demanda validada.</td>
+              <td class="risk">Nao iniciar antes do fechamento da Alfa com sign-off, suporte nominal e decisao de produto documentada.</td>
+            </tr>
           </tbody>
         </table>
       </section>
@@ -266,11 +274,16 @@
         Roadmap Alfa/Beta:
         <a href="./ROADMAP.md">ROADMAP.md</a>
         <br />
+        Mapeamento de escopo por fase:
+        <a href="./PRODUCT_SCOPE_PHASE_MAPPING.md">PRODUCT_SCOPE_PHASE_MAPPING.md</a>
+        <br />
         Release readiness:
         <a href="./RELEASE_READINESS_CHECKLIST.md">RELEASE_READINESS_CHECKLIST.md</a>
         <br />
         Production GO blocker resolution:
         <a href="./PRODUCTION_GO_BLOCKER_RESOLUTION.md">PRODUCTION_GO_BLOCKER_RESOLUTION.md</a>
+        <br />
+        Fechamento rapido: preencha o bloco "Immediate closure input block (fill once)" no blocker resolution.
         <br />
         Guia de auditoria rapida:
         <a href="./USER_GUIDE_QUICK_AUDIT.md">USER_GUIDE_QUICK_AUDIT.md</a>
