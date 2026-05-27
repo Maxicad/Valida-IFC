@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta
 from pathlib import Path
 from re import sub
@@ -30,6 +31,7 @@ from ifc_utils.ifc_reader import read_ifc_schema_from_bytes
 router = APIRouter(tags=["ifc-files"], dependencies=[Depends(get_current_user)])
 ALLOWED_DISCIPLINES = {"arquitetura", "estrutura", "instalacoes", "coordenacao"}
 FRAGMENT_FORMAT_VERSION = "thatopen-fragments-3.4.5"
+VIEWER_INDEX_FORMAT_VERSION = "viewer-elements-v1"
 
 
 def safe_file_name(file_name: str) -> str:
@@ -41,10 +43,96 @@ def fragment_cache_path(ifc_file: IfcFile) -> Path:
     return Path(settings.local_storage_path) / "fragments" / ifc_file.project_id / f"{ifc_file.id}.frag"
 
 
+def viewer_index_path(ifc_file: IfcFile) -> Path:
+    return Path(settings.local_storage_path) / "viewer-index" / ifc_file.project_id / f"{ifc_file.id}.json"
+
+
 def delete_fragment_cache(ifc_file: IfcFile) -> None:
     path = fragment_cache_path(ifc_file)
     if path.exists() and path.is_file():
         path.unlink()
+
+
+def delete_viewer_index(ifc_file: IfcFile) -> None:
+    path = viewer_index_path(ifc_file)
+    if path.exists() and path.is_file():
+        path.unlink()
+
+
+def read_cached_viewer_index(ifc_file: IfcFile) -> list[dict[str, str | None]] | None:
+    path = viewer_index_path(ifc_file)
+    if not path.exists() or not path.is_file():
+        return None
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("format_version") != VIEWER_INDEX_FORMAT_VERSION:
+        return None
+    if payload.get("ifc_file_id") != ifc_file.id or payload.get("file_size") != ifc_file.file_size:
+        return None
+
+    rows = payload.get("elements")
+    if not isinstance(rows, list):
+        return None
+
+    normalized_rows: list[dict[str, str | None]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        global_id = row.get("global_id")
+        entity = row.get("entity")
+        name = row.get("name")
+        if not isinstance(global_id, str) or not global_id or not isinstance(entity, str) or not entity:
+            continue
+        normalized_rows.append(
+            {
+                "global_id": global_id,
+                "entity": entity,
+                "name": name if isinstance(name, str) and name else None,
+            }
+        )
+    return normalized_rows
+
+
+def write_viewer_index(ifc_file: IfcFile, rows: list[dict[str, str | None]]) -> None:
+    path = viewer_index_path(ifc_file)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "format_version": VIEWER_INDEX_FORMAT_VERSION,
+        "ifc_file_id": ifc_file.id,
+        "file_size": ifc_file.file_size,
+        "generated_at": datetime.utcnow().isoformat(),
+        "elements": rows,
+    }
+    temp_path = path.with_suffix(".json.tmp")
+    temp_path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    temp_path.replace(path)
+
+
+def get_or_create_viewer_index(ifc_file: IfcFile) -> list[dict[str, str | None]]:
+    cached = read_cached_viewer_index(ifc_file)
+    if cached is not None:
+        return cached
+
+    context = IfcAuditContext(ifc_file.file_path, schema_hint=ifc_file.ifc_schema)
+    rows: list[dict[str, str | None]] = []
+    for element in context.list_elements("IfcProduct"):
+        if not element.guid:
+            continue
+        rows.append(
+            {
+                "global_id": element.guid,
+                "entity": element.entity,
+                "name": element.name,
+            }
+        )
+    write_viewer_index(ifc_file, rows)
+    return rows
 
 
 def fragment_cache_response(ifc_file: IfcFile) -> ViewerFragmentCacheResponse:
@@ -272,19 +360,17 @@ def get_viewer_data(ifc_file_id: str, db: Session = Depends(get_db)) -> ViewerDa
             elif guid not in status_map:
                 status_map[guid] = "approved"
 
-    context = IfcAuditContext(ifc_file.file_path, schema_hint=ifc_file.ifc_schema)
-    elements = context.list_elements("IfcProduct")
+    elements = get_or_create_viewer_index(ifc_file)
     for element in elements:
-        if not element.guid:
-            continue
+        global_id = element["global_id"]
         elements_payload.append(
             ViewerElementResponse(
-                global_id=element.guid,
-                entity=element.entity,
-                name=element.name,
-                status=status_map.get(element.guid, "unknown"),
-                severity=failed_severity_by_guid.get(element.guid),
-                failed_criteria_codes=sorted(failed_codes_by_guid.get(element.guid, set())),
+                global_id=global_id,
+                entity=element["entity"] or "IfcProduct",
+                name=element["name"],
+                status=status_map.get(global_id, "unknown"),
+                severity=failed_severity_by_guid.get(global_id),
+                failed_criteria_codes=sorted(failed_codes_by_guid.get(global_id, set())),
             )
         )
 
@@ -385,6 +471,7 @@ def delete_ifc_file(ifc_file_id: str, db: Session = Depends(get_db)) -> None:
     if stored_path.exists() and stored_path.is_file():
         stored_path.unlink()
     delete_fragment_cache(ifc_file)
+    delete_viewer_index(ifc_file)
 
     db.delete(ifc_file)
     db.commit()
