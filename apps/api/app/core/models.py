@@ -55,6 +55,22 @@ class IfcFile(Base):
     status: Mapped[str] = mapped_column(String(60), default="uploaded")
     metadata_json: Mapped[dict | None] = mapped_column(JSON)
 
+    @property
+    def discipline(self) -> str | None:
+        metadata = self.metadata_json or {}
+        raw = metadata.get("discipline")
+        if isinstance(raw, str) and raw.strip():
+            return raw.strip().lower()
+
+        name = (self.file_name or "").lower()
+        if any(token in name for token in ("arq", "arquitet", "arch")):
+            return "arquitetura"
+        if any(token in name for token in ("estrut", "struc", "struct")):
+            return "estrutura"
+        if any(token in name for token in ("mep", "inst", "hvac", "hidra", "eletr")):
+            return "instalacoes"
+        return None
+
 
 class CriteriaSet(Base, TimestampMixin):
     __tablename__ = "criteria_sets"

@@ -3,7 +3,7 @@ from pathlib import Path
 from re import sub
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -14,10 +14,13 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.models import AuditResult, AuditRun, Criterion, IfcFile, Project, User
 from app.files.schemas import (
+    IfcDisciplineUpdateRequest,
+    IfcWorkspaceResponse,
     IfcFileResponse,
     IfcMetadataResponse,
     ViewerDataResponse,
     ViewerElementResponse,
+    ViewerFragmentCacheResponse,
     ViewerGeometryElementResponse,
     ViewerGeometryResponse,
 )
@@ -25,11 +28,45 @@ from ifc_utils.ifc_metadata import build_metadata_from_header
 from ifc_utils.ifc_reader import read_ifc_schema_from_bytes
 
 router = APIRouter(tags=["ifc-files"], dependencies=[Depends(get_current_user)])
+ALLOWED_DISCIPLINES = {"arquitetura", "estrutura", "instalacoes", "coordenacao"}
+FRAGMENT_FORMAT_VERSION = "thatopen-fragments-3.4.5"
 
 
 def safe_file_name(file_name: str) -> str:
     name = Path(file_name).name
     return sub(r"[^A-Za-z0-9._-]+", "_", name)
+
+
+def fragment_cache_path(ifc_file: IfcFile) -> Path:
+    return Path(settings.local_storage_path) / "fragments" / ifc_file.project_id / f"{ifc_file.id}.frag"
+
+
+def delete_fragment_cache(ifc_file: IfcFile) -> None:
+    path = fragment_cache_path(ifc_file)
+    if path.exists() and path.is_file():
+        path.unlink()
+
+
+def fragment_cache_response(ifc_file: IfcFile) -> ViewerFragmentCacheResponse:
+    metadata = ifc_file.metadata_json or {}
+    cache_metadata = metadata.get("viewer_fragment_cache")
+    path = fragment_cache_path(ifc_file)
+    cached = path.exists() and path.is_file()
+    generated_at = None
+    if isinstance(cache_metadata, dict) and isinstance(cache_metadata.get("generated_at"), str):
+        try:
+            generated_at = datetime.fromisoformat(cache_metadata["generated_at"])
+        except ValueError:
+            generated_at = None
+
+    return ViewerFragmentCacheResponse(
+        ifc_file_id=ifc_file.id,
+        cached=cached,
+        fragment_url=f"/ifc-files/{ifc_file.id}/viewer-fragment" if cached else None,
+        byte_size=path.stat().st_size if cached else None,
+        generated_at=generated_at if cached else None,
+        format_version=FRAGMENT_FORMAT_VERSION if cached else None,
+    )
 
 
 @router.post(
@@ -40,6 +77,7 @@ def safe_file_name(file_name: str) -> str:
 async def upload_ifc(
     project_id: str,
     file: UploadFile = File(...),
+    discipline: str | None = Form(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> IfcFile:
@@ -61,6 +99,8 @@ async def upload_ifc(
 
     schema = read_ifc_schema_from_bytes(content)
     metadata = build_metadata_from_header(content)
+    if discipline and discipline.strip():
+        metadata["discipline"] = discipline.strip().lower()
 
     storage_dir = Path(settings.local_storage_path) / "ifc" / project_id
     storage_dir.mkdir(parents=True, exist_ok=True)
@@ -99,11 +139,62 @@ def list_project_ifc_files(project_id: str, db: Session = Depends(get_db)) -> li
     )
 
 
+@router.get("/projects/{project_id}/ifc-workspace", response_model=IfcWorkspaceResponse)
+def get_project_ifc_workspace(project_id: str, db: Session = Depends(get_db)) -> IfcWorkspaceResponse:
+    project = db.get(Project, project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found.")
+
+    ifc_files = list(
+        db.scalars(
+            select(IfcFile).where(IfcFile.project_id == project_id).order_by(IfcFile.uploaded_at.desc())
+        )
+    )
+    selected = ifc_files[0].id if ifc_files else None
+
+    return IfcWorkspaceResponse(
+        project_id=project_id,
+        ifc_files=ifc_files,
+        selected_ifc_file_id=selected,
+        viewer_data_url=f"/ifc-files/{selected}/viewer-data" if selected else None,
+        viewer_geometry_url=f"/ifc-files/{selected}/viewer-geometry" if selected else None,
+        viewer_page_url=f"/visualizador?ifc_file_id={selected}" if selected else None,
+    )
+
+
 @router.get("/ifc-files/{ifc_file_id}", response_model=IfcFileResponse)
 def get_ifc_file(ifc_file_id: str, db: Session = Depends(get_db)) -> IfcFile:
     ifc_file = db.get(IfcFile, ifc_file_id)
     if ifc_file is None:
         raise HTTPException(status_code=404, detail="IFC file not found.")
+    return ifc_file
+
+
+@router.put("/ifc-files/{ifc_file_id}/discipline", response_model=IfcFileResponse)
+def update_ifc_file_discipline(
+    ifc_file_id: str,
+    payload: IfcDisciplineUpdateRequest,
+    db: Session = Depends(get_db),
+) -> IfcFile:
+    ifc_file = db.get(IfcFile, ifc_file_id)
+    if ifc_file is None:
+        raise HTTPException(status_code=404, detail="IFC file not found.")
+
+    normalized = (payload.discipline or "").strip().lower()
+    metadata = dict(ifc_file.metadata_json or {})
+    if not normalized or normalized == "auto":
+        metadata.pop("discipline", None)
+    else:
+        if normalized not in ALLOWED_DISCIPLINES:
+            raise HTTPException(
+                status_code=422,
+                detail="Invalid discipline. Allowed: arquitetura, estrutura, instalacoes, coordenacao.",
+            )
+        metadata["discipline"] = normalized
+
+    ifc_file.metadata_json = metadata
+    db.commit()
+    db.refresh(ifc_file)
     return ifc_file
 
 
@@ -226,6 +317,64 @@ def get_viewer_geometry(ifc_file_id: str, db: Session = Depends(get_db)) -> View
     )
 
 
+@router.get("/ifc-files/{ifc_file_id}/viewer-fragment-cache", response_model=ViewerFragmentCacheResponse)
+def get_viewer_fragment_cache(ifc_file_id: str, db: Session = Depends(get_db)) -> ViewerFragmentCacheResponse:
+    ifc_file = db.get(IfcFile, ifc_file_id)
+    if ifc_file is None:
+        raise HTTPException(status_code=404, detail="IFC file not found.")
+
+    return fragment_cache_response(ifc_file)
+
+
+@router.get("/ifc-files/{ifc_file_id}/viewer-fragment")
+def download_viewer_fragment(ifc_file_id: str, db: Session = Depends(get_db)) -> FileResponse:
+    ifc_file = db.get(IfcFile, ifc_file_id)
+    if ifc_file is None:
+        raise HTTPException(status_code=404, detail="IFC file not found.")
+
+    path = fragment_cache_path(ifc_file)
+    if not path.exists() or not path.is_file():
+        raise HTTPException(status_code=404, detail="Viewer fragment cache not found.")
+
+    return FileResponse(
+        path=path,
+        filename=f"{Path(ifc_file.file_name).stem}.frag",
+        media_type="application/octet-stream",
+    )
+
+
+@router.put("/ifc-files/{ifc_file_id}/viewer-fragment", response_model=ViewerFragmentCacheResponse)
+async def upload_viewer_fragment(
+    ifc_file_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> ViewerFragmentCacheResponse:
+    ifc_file = db.get(IfcFile, ifc_file_id)
+    if ifc_file is None:
+        raise HTTPException(status_code=404, detail="IFC file not found.")
+
+    content = await file.read(settings.viewer_fragment_max_bytes + 1)
+    if len(content) > settings.viewer_fragment_max_bytes:
+        raise HTTPException(status_code=413, detail="Viewer fragment cache is larger than the configured limit.")
+    if not content:
+        raise HTTPException(status_code=422, detail="Viewer fragment cache is empty.")
+
+    path = fragment_cache_path(ifc_file)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(content)
+
+    metadata = dict(ifc_file.metadata_json or {})
+    metadata["viewer_fragment_cache"] = {
+        "format_version": FRAGMENT_FORMAT_VERSION,
+        "byte_size": len(content),
+        "generated_at": datetime.utcnow().isoformat(),
+    }
+    ifc_file.metadata_json = metadata
+    db.commit()
+    db.refresh(ifc_file)
+    return fragment_cache_response(ifc_file)
+
+
 @router.delete("/ifc-files/{ifc_file_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_ifc_file(ifc_file_id: str, db: Session = Depends(get_db)) -> None:
     ifc_file = db.get(IfcFile, ifc_file_id)
@@ -235,6 +384,7 @@ def delete_ifc_file(ifc_file_id: str, db: Session = Depends(get_db)) -> None:
     stored_path = Path(ifc_file.file_path)
     if stored_path.exists() and stored_path.is_file():
         stored_path.unlink()
+    delete_fragment_cache(ifc_file)
 
     db.delete(ifc_file)
     db.commit()
@@ -291,6 +441,7 @@ def cleanup_expired_project_files(db: Session, project_id: str) -> None:
         stored_path = Path(item.file_path)
         if stored_path.exists() and stored_path.is_file():
             stored_path.unlink()
+        delete_fragment_cache(item)
         db.delete(item)
     db.flush()
 

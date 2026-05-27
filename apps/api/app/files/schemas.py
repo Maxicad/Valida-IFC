@@ -14,6 +14,7 @@ class IfcFileResponse(BaseModel):
     ifc_version: str | None = None
     uploaded_at: datetime
     status: str
+    discipline: str | None = None
     metadata_json: dict | None = None
 
 
@@ -21,6 +22,10 @@ class IfcMetadataResponse(BaseModel):
     ifc_schema: str | None
     ifc_version: str | None
     metadata: dict
+
+
+class IfcDisciplineUpdateRequest(BaseModel):
+    discipline: str | None = None
 
 
 class ViewerElementResponse(BaseModel):
@@ -51,3 +56,21 @@ class ViewerGeometryElementResponse(BaseModel):
 class ViewerGeometryResponse(BaseModel):
     ifc_file_id: str
     elements: list[ViewerGeometryElementResponse]
+
+
+class ViewerFragmentCacheResponse(BaseModel):
+    ifc_file_id: str
+    cached: bool
+    fragment_url: str | None = None
+    byte_size: int | None = None
+    generated_at: datetime | None = None
+    format_version: str | None = None
+
+
+class IfcWorkspaceResponse(BaseModel):
+    project_id: str
+    ifc_files: list[IfcFileResponse]
+    selected_ifc_file_id: str | None = None
+    viewer_data_url: str | None = None
+    viewer_geometry_url: str | None = None
+    viewer_page_url: str | None = None

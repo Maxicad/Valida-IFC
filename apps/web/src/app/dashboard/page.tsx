@@ -23,6 +23,10 @@ import type { Metric } from "@/types/dashboard";
 
 type MetricConfig = Metric & { tone: "moss" | "steel" | "amber" | "coral"; icon: typeof FolderKanban };
 
+function formatStatus(status: string): string {
+  return status.replaceAll("_", " ");
+}
+
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [criteriaSets, setCriteriaSets] = useState<CriteriaSet[]>([]);
@@ -40,7 +44,7 @@ export default function DashboardPage() {
       setProjects(loadedProjects);
       setCriteriaSets(loadedCriteriaSets);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar dashboard.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar o dashboard.");
     } finally {
       setLoading(false);
     }
@@ -60,9 +64,9 @@ export default function DashboardPage() {
         icon: FolderKanban,
       },
       {
-        label: "Conjuntos de criterios",
+        label: "Conjuntos de critérios",
         value: String(criteriaSets.length),
-        detail: "Regras disponiveis",
+        detail: "Regras disponíveis",
         tone: "moss",
         icon: ClipboardCheck,
       },
@@ -74,9 +78,9 @@ export default function DashboardPage() {
         icon: FileText,
       },
       {
-        label: "Falhas criticas",
+        label: "Falhas críticas",
         value: "-",
-        detail: "Apos auditoria",
+        detail: "Após auditoria",
         tone: "coral",
         icon: AlertTriangle,
       },
@@ -86,8 +90,8 @@ export default function DashboardPage() {
 
   const quickActions = [
     { href: "/projetos", label: "Projetos", icon: FolderKanban },
-    { href: "/projetos/upload", label: "Upload IFC", icon: Upload },
-    { href: "/criterios", label: "Criterios", icon: ClipboardCheck },
+    { href: "/projetos/modelos", label: "Modelos IFC", icon: Upload },
+    { href: "/criterios", label: "Critérios", icon: ClipboardCheck },
     { href: "/auditorias", label: "Auditorias", icon: CheckCircle2 },
     { href: "/visualizador", label: "Visualizador", icon: View },
   ];
@@ -98,9 +102,9 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-steel">Painel Operacional</p>
-            <h1 className="mt-1 text-2xl font-semibold text-ink">Dashboard de validacao IFC</h1>
+            <h1 className="mt-1 text-2xl font-semibold text-ink">Dashboard de validação IFC</h1>
             <p className="mt-2 max-w-2xl text-sm text-ink/65">
-              Acompanhe projetos, conjuntos de criterios e o andamento da validacao de forma centralizada.
+              Acompanhe projetos, conjuntos de critérios e o andamento da validação de forma centralizada.
             </p>
           </div>
           <Button onClick={() => void loadDashboard()} type="button" variant="secondary">
@@ -163,10 +167,15 @@ export default function DashboardPage() {
                   key={project.id}
                   className="grid gap-2 border-b border-line px-4 py-3 text-sm last:border-0 md:grid-cols-[1.6fr_1fr_0.8fr] md:items-center"
                 >
-                  <strong className="font-medium text-ink">{project.name}</strong>
+                  <Link
+                    className="font-medium text-ink hover:text-steel hover:underline"
+                    href={{ pathname: "/projetos/modelos", query: { project_id: project.id } }}
+                  >
+                    {project.name}
+                  </Link>
                   <span className="text-ink/70">{project.client}</span>
                   <span className="text-left text-xs font-semibold uppercase tracking-wide text-steel md:text-right">
-                    {project.status}
+                    {formatStatus(project.status)}
                   </span>
                 </div>
               ))
@@ -175,7 +184,7 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="p-4 md:p-5">
-          <h2 className="text-lg font-semibold text-ink">Conjuntos de criterios</h2>
+          <h2 className="text-lg font-semibold text-ink">Conjuntos de critérios</h2>
           <div className="mt-4 space-y-2">
             {criteriaSets.length === 0 ? (
               <p className="rounded-md bg-surface px-3 py-3 text-sm text-ink/60">Nenhum conjunto cadastrado.</p>
@@ -197,7 +206,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="mt-4 rounded-lg border border-line bg-panel p-5 shadow-soft">
-        <h2 className="text-lg font-semibold text-ink">Acoes rapidas</h2>
+        <h2 className="text-lg font-semibold text-ink">Ações rápidas</h2>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           {quickActions.map((action) => {
             const Icon = action.icon;

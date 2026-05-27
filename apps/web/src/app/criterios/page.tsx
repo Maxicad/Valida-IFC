@@ -15,7 +15,7 @@ export default function CriteriaPage() {
   const [selectedSetId, setSelectedSetId] = useState("");
   const [setName, setSetName] = useState("Criterios BIM Basicos");
   const [criterionCode, setCriterionCode] = useState("IFC-001");
-  const [criterionName, setCriterionName] = useState("Versao minima IFC");
+  const [criterionName, setCriterionName] = useState("Versão mínima IFC");
   const [error, setError] = useState<string | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importResult, setImportResult] = useState<CriteriaImportResponse | null>(null);
@@ -27,7 +27,7 @@ export default function CriteriaPage() {
       setCriteriaSets(sets);
       setSelectedSetId((current) => current || sets[0]?.id || "");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar conjuntos.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar conjuntos.");
     }
   }
 
@@ -39,7 +39,7 @@ export default function CriteriaPage() {
     try {
       setCriteria(await apiGet<Criterion[]>(`/criteria?criteria_set_id=${criteriaSetId}`));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar criterios.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar critérios.");
     }
   }, []);
 
@@ -53,14 +53,14 @@ export default function CriteriaPage() {
       setSelectedSetId(created.id);
       await loadCriteriaSets();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel criar conjunto.");
+      setError(err instanceof Error ? err.message : "Não foi possível criar conjunto.");
     }
   }
 
   async function createCriterion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selectedSetId) {
-      setError("Crie ou selecione um conjunto de criterios.");
+      setError("Crie ou selecione um conjunto de critérios.");
       return;
     }
     try {
@@ -78,7 +78,7 @@ export default function CriteriaPage() {
       });
       await loadCriteria(selectedSetId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel criar criterio.");
+      setError(err instanceof Error ? err.message : "Não foi possível criar critério.");
     }
   }
 
@@ -103,7 +103,7 @@ export default function CriteriaPage() {
       await loadCriteriaSets();
       await loadCriteria(result.criteria_set.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel importar criterios.");
+      setError(err instanceof Error ? err.message : "Não foi possível importar critérios.");
     }
   }
 
@@ -162,7 +162,7 @@ export default function CriteriaPage() {
           {error && <p className="mb-4 rounded-md bg-coral/10 px-3 py-2 text-sm text-coral">{error}</p>}
           <div className="overflow-hidden rounded-md border border-line">
             {criteria.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-ink/60">Nenhum criterio cadastrado.</div>
+              <div className="px-4 py-3 text-sm text-ink/60">Nenhum critério cadastrado.</div>
             ) : (
               criteria.map((criterion) => (
                 <div
@@ -183,7 +183,7 @@ export default function CriteriaPage() {
 
         <Card>
           <form className="mb-5 border-b border-line pb-5" onSubmit={importCriteria}>
-            <h2 className="mb-3 font-semibold">Importar criterios</h2>
+            <h2 className="mb-3 font-semibold">Importar critérios</h2>
             <input
               accept=".csv,.txt,.xls,.xlsx,.ids,.xml"
               className="w-full rounded-md border border-line bg-white px-3 py-2 text-sm"
@@ -196,7 +196,7 @@ export default function CriteriaPage() {
             </Button>
             {importResult && (
               <div className="mt-3 rounded-md bg-surface p-3 text-sm">
-                <strong className="block">Importacao concluida</strong>
+                <strong className="block">Importação concluída</strong>
                 <span className="text-ink/65">
                   {importResult.imported_count}/{importResult.total_rows} importados
                 </span>
@@ -213,7 +213,7 @@ export default function CriteriaPage() {
             )}
           </form>
           <form className="mb-5 border-b border-line pb-5" onSubmit={createCriteriaSet}>
-            <h2 className="mb-3 font-semibold">Grupo de criterios</h2>
+            <h2 className="mb-3 font-semibold">Grupo de critérios</h2>
             <input
               className="h-10 w-full rounded-md border border-line px-3 text-sm outline-none"
               onChange={(event) => setSetName(event.target.value)}
@@ -225,7 +225,7 @@ export default function CriteriaPage() {
             </Button>
           </form>
           <form className="mb-5 border-b border-line pb-5" onSubmit={createCriterion}>
-            <h2 className="mb-3 font-semibold">Novo criterio</h2>
+            <h2 className="mb-3 font-semibold">Novo critério</h2>
             <input
               className="mb-2 h-10 w-full rounded-md border border-line px-3 text-sm outline-none"
               onChange={(event) => setCriterionCode(event.target.value)}
@@ -239,12 +239,12 @@ export default function CriteriaPage() {
               value={criterionName}
             />
             <Button className="mt-3 w-full" type="submit">
-              Salvar criterio
+              Salvar critério
             </Button>
           </form>
           <div className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-steel" />
-            <h2 className="font-semibold">Sugestao de criterio</h2>
+            <h2 className="font-semibold">Sugestão de critério</h2>
           </div>
           <textarea
             className="mt-4 min-h-32 w-full rounded-md border border-line p-3 text-sm outline-none focus:ring-2 focus:ring-steel/25"

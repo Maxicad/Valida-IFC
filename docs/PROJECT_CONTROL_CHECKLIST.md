@@ -1,11 +1,11 @@
 # Project Control Checklist - Valida IFC
 
-Last update: 2026-05-26
+Last update: 2026-05-27
 Reference timezone: America/Sao_Paulo
 Owner: Product + Engineering
 Last manual status refresh: 2026-05-24 (user requested in-app status review)
-Last daily routine execution: 2026-05-25 (backend tests 28 passed; frontend lint/typecheck/build passed; interface smoke web routes 200 after next dev cache reset)
-Current milestone: Versao Alfa / Phase 9 partially complete; release docs, monitoring plan, real pilot automated acceptance, rollback dry-run and Google login prepared, production GO blocked by stakeholder sign-off and named support rotation/channel.
+Last daily routine execution: 2026-05-27 (backend tests 29 passed; frontend lint/typecheck/build passed; end-to-end scenario and interface retest passed after next dev restart)
+Current milestone: Versao Alfa / Phase 9 GO with conditions for pilot/Alfa; interface test link released for complete review.
 Strategy update (IFC Tools vs Valida IFC): prioritize the audit evidence journey in Alfa; defer quantities, IA, natural-language audit requests, clash and sets until after Alfa validation.
 Scope mapping update 2026-05-26: BIM criteria in CSV/XLS/IDS, severity scoring, delivery-ready report, 3D element nonconformity inspection and lightweight BIM auditor flow are Alfa scope; BCF, broader IDS, public API and self-host are Phase 10/Beta candidates after Alfa validation.
 
@@ -43,9 +43,42 @@ Scope mapping update 2026-05-26: BIM criteria in CSV/XLS/IDS, severity scoring, 
 - Phase 6: DONE
 - Phase 7: DONE
 - Phase 8: DONE
-- Phase 9: PARTIAL
+- Phase 9: GO WITH CONDITIONS
 - Phase 10: NOT STARTED
-- Product release: Alfa PARTIAL, Beta NOT STARTED
+- Product release: Alfa GO WITH CONDITIONS, Beta NOT STARTED
+
+---
+
+## Evidence - 2026-05-27 end-to-end review and test links
+
+- Validation executed:
+  - `corepack pnpm --filter @valida-ifc/web lint` (passed)
+  - `corepack pnpm --filter @valida-ifc/web typecheck` (passed)
+  - `corepack pnpm --filter @valida-ifc/web build` (passed)
+  - `docker compose run --rm --no-deps api pytest apps/api/tests -q` (29 passed)
+  - API health check on `http://localhost:8000/health` (200)
+- Complete scenario created:
+  - Project: `Teste completo Codex 20260527194821`
+  - Project ID: `f13c5c2f-04a9-44d3-9dd9-703c13d9e241`
+  - IFC files: `fec4a7cb-5665-4d16-ab14-2805407dde34`, `0e4623d3-95bd-4701-894f-19062ff2c95d`
+  - Criteria set: `ceca8a61-a39a-462e-8188-818b11729b12`
+  - Audit: `e17ae0cd-586f-44d5-9934-269621c696af`, completed, score 50, 4 results
+  - Snapshot: `http://localhost:8000/snapshots/8_z-sXYYtYya3yyZ6pljdzS2YoBn5ulvrFnm5Nreld8`
+- Interface retest:
+  - Desktop routes passed: `/demo`, `/dashboard`, `/projetos`, `/projetos/modelos`, `/criterios`, `/auditorias`, `/visualizador`, `/relatorios`.
+  - Mobile routes passed: `/login`, `/projetos`, `/visualizador`.
+  - No `Cannot find module`, `Model not found`, `Fragments:` or `Failed to fetch` markers found.
+  - No horizontal overflow detected in tested desktop/mobile viewports.
+  - Viewer canvas rendered on desktop and mobile.
+- Evidence artifacts:
+  - `docs/evidence/end-to-end-2026-05-27/scenario.json`
+  - `docs/evidence/end-to-end-2026-05-27/ui-review-results-retest.json`
+  - Screenshots in `docs/evidence/end-to-end-2026-05-27/*-retest.png`
+- Operational note:
+  - The first interface run hit stale Next dev chunks after `next build` (`Cannot find module './255.js'`).
+  - Mitigation: restart the frontend dev server on port 3001 and rerun the browser review. Retest passed.
+
+Decision: GO for complete local test link review on 2026-05-27. Expanded production use remains under Phase 9 conditions.
 
 ---
 
@@ -104,10 +137,10 @@ Purpose: validate the real user value of IFC audit evidence before adding produc
 ### Alfa -> Beta gate
 
 - [ ] At least one real project UAT accepted or rejected with clear notes.
-- [ ] Stakeholder sign-off recorded in `docs/SIGN_OFF_REGISTER.md`.
-- [ ] Support owner and backup named in `docs/POST_GO_LIVE_MONITORING.md`.
+- [x] Stakeholder sign-off recorded in `docs/SIGN_OFF_REGISTER.md`.
+- [x] Support owner and backup named in `docs/POST_GO_LIVE_MONITORING.md`.
 - [ ] Desktop and mobile interface evidence captured.
-- [ ] Product decision recorded: the audit journey is useful, understandable and repeatable.
+- [x] Product decision recorded: the audit journey is useful enough for pilot/Alfa, with interface adjustments required before expanded use.
 
 ### Versao Beta - planned scope
 
@@ -590,15 +623,15 @@ Decision: GO
   - IFC source: `H:\Drives compartilhados\MaxiCAD Projetos\IFCMaxi\00 - Modelos BIM\SALE-MET-EX-9001-TOR1-GERL-R01.ifc`.
   - Local evidence copy: `samples/ifc/SALE-MET-EX-9001-TOR1-GERL-R01.ifc`.
   - Automated acceptance: `PILOT_IFC_PATH=samples/ifc/SALE-MET-EX-9001-TOR1-GERL-R01.ifc corepack pnpm --filter @valida-ifc/web e2e e2e/pilot-acceptance.spec.ts` (2 passed: desktop + mobile).
-- [ ] Stakeholder sign-off recorded.
+- [x] Stakeholder sign-off recorded.
   - Register prepared: `docs/SIGN_OFF_REGISTER.md`.
   - Formal request prepared: `docs/STAKEHOLDER_GO_SIGNOFF_REQUEST.md`.
   - Closure packet prepared: `docs/PRODUCTION_GO_BLOCKER_RESOLUTION.md`.
-  - Blocked: named approvers, approval channel and acceptance notes are required.
-- [ ] Post-go-live monitoring plan and support rotation active.
+  - Decision recorded on 2026-05-26: GO for pilot/Alfa with interface adjustments pending before expanded use.
+- [x] Post-go-live monitoring plan and support rotation active for pilot/Alfa.
   - Plan prepared: `docs/POST_GO_LIVE_MONITORING.md`.
   - Closure packet prepared: `docs/PRODUCTION_GO_BLOCKER_RESOLUTION.md`.
-  - Blocked: named primary/backup support owners and notification channel are required before production go-live.
+  - Named owner/channel recorded: Equipe MaxiCAD and `suporte@maxicad.com.br`.
 
 ### Validation and tests (mandatory gate)
 - [x] Automated full system flow passed on desktop and mobile (`corepack pnpm e2e`, 6 passed).
@@ -606,8 +639,9 @@ Decision: GO
 - [x] Backend tests passed (`docker compose run --rm --no-deps api pytest apps/api/tests -q`, 27 passed).
 - [x] Frontend lint/typecheck/build passed.
 - [x] Google login E2E passed on desktop and mobile.
-- [ ] Full system UAT signed off with real pilot project.
-- [ ] Interface UAT signed off (desktop + mobile checkpoints) by stakeholder.
+- [x] Full system UAT signed off with real pilot project for pilot/Alfa.
+- [ ] Interface UAT signed off without conditions by stakeholder.
+  - Current acceptance is GO with interface adjustments pending before expanded use.
 - [x] Dry-run release and rollback executed in staging-equivalent environment.
   - Evidence: `docs/evidence/phase9-2026-05-24/rollback-dry-run/RESULTS.md`.
 
@@ -636,12 +670,36 @@ Decision: GO
   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID=google-alpha-client corepack pnpm --filter @valida-ifc/web e2e e2e/google-login.spec.ts --project chromium-mobile` (1 passed)
 - Rollback dry-run evidence stored under `docs/evidence/phase9-2026-05-24/rollback-dry-run/`.
 - Production GO blocker resolution packet stored at `docs/PRODUCTION_GO_BLOCKER_RESOLUTION.md`.
-- Open production GO blockers:
+- Open production GO blockers at that time:
   - stakeholder sign-off;
   - named support rotation and notification channel.
 - Evidence artifact: `docs/evidence/phase9-2026-05-24/RESULTS.md`.
 
-Decision: PARTIAL / NO-GO for production
+Decision: GO WITH CONDITIONS for pilot/Alfa; expanded production use pending interface adjustments and production dashboard/alert wiring.
+
+### Evidence - 2026-05-26 Phase 9 sign-off update
+
+- Product owner: Adriano - MaxiCAD.
+- Product decision: GO, with many interface adjustments still expected.
+- BIM/domain stakeholder: Adriano - MaxiCAD.
+- BIM/domain decision: GO with interface adjustments.
+- Engineering release owner: MaxiCAD.
+- Engineering decision: GO.
+- Operations/support owner: Equipe MaxiCAD.
+- Engineering on-call: Equipe MaxiCAD / Equipe MaxiCAD.
+- Product/BIM support: Equipe MaxiCAD / Equipe MaxiCAD.
+- Stakeholder contact: Adriano - MaxiCAD / Equipe MaxiCAD.
+- Incident notification channel: `suporte@maxicad.com.br`.
+- 72-hour monitoring owner: Equipe MaxiCAD.
+- Acceptance note: GO aprovado para piloto/Alfa, com ajustes de interface pendentes antes de ampliar uso.
+- Updated artifacts:
+  - `docs/SIGN_OFF_REGISTER.md`
+  - `docs/POST_GO_LIVE_MONITORING.md`
+  - `docs/PRODUCTION_GO_BLOCKER_RESOLUTION.md`
+
+Open conditions:
+- Triage, prioritize and validate the pending interface adjustments before expanded use.
+- Connect production dashboards/alerts in the target deployment environment.
 
 ### Evidence - 2026-05-25 daily control routine
 
@@ -657,14 +715,19 @@ Decision: PARTIAL / NO-GO for production
   - Mitigation used in routine: stop dev server, remove `apps/web/.next`, restart dev server.
   - Status after mitigation: interface smoke returned to 200 on all core routes.
 - Phase status impact:
-  - No phase moved. Phase 9 remains PARTIAL because GO blockers are non-technical (stakeholder sign-off and named support rotation/channel).
+  - No phase moved during the 2026-05-25 routine. Phase 9 still required sign-off and named support at that point.
+
+### Phase status impact after 2026-05-26 sign-off
+
+- Phase 9 moved from PARTIAL to GO WITH CONDITIONS for pilot/Alfa after sign-off and support ownership were provided on 2026-05-26.
+- Expanded use remains conditional because interface adjustments and target production dashboard/alert wiring are still open.
 
 ---
 
 ## Phase 10 - Beta openBIM extensions and deployment model
 
 ### Scope checklist
-- [ ] Start only after Phase 9 closes with stakeholder sign-off and support rotation/channel active.
+- [ ] Start only after Phase 9 closes without open interface conditions and support rotation/channel remains active.
 - [ ] Export nonconformities as BCF with GlobalId, title, description, severity, rule code and evidence reference.
 - [ ] Expand IDS support beyond the MVP subset based on pilot files and user demand.
 - [ ] Export applicable internal criteria as IDS while preserving unsupported-rule warnings.

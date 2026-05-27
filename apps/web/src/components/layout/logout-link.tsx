@@ -10,7 +10,7 @@ export function LogoutLink() {
 
   return (
     <button
-      className="flex items-center gap-2 text-sm font-medium text-ink/70"
+      className="flex h-10 items-center gap-2 rounded-md border border-white/15 px-3 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
       onClick={() => {
         clearStoredToken();
         router.push("/login");

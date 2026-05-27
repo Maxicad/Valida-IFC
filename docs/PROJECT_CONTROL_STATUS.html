@@ -147,10 +147,12 @@
     <div class="wrap">
       <section class="header">
         <h1>Status do Projeto - Valida IFC</h1>
-        <p class="muted">Snapshot em 2026-05-26 (America/Sao_Paulo)</p>
+        <p class="muted">Snapshot em 2026-05-27 (America/Sao_Paulo)</p>
         <p class="muted">Atualizacao manual solicitada em 2026-05-24 no in-app browser.</p>
         <p class="muted">Rotina executada em 2026-05-25: backend tests 28 passed; frontend lint/typecheck/build passed; smoke de interface desktop (8 rotas) com HTTP 200 apos reset de cache `.next` do next dev.</p>
-        <p class="muted">Marco atual: Versao Alfa / Phase 9 parcial; release docs, monitoramento, aceite automatizado com IFC real, rollback dry-run e Google login preparados, producao bloqueada por sign-off e rotacao/canal nominal.</p>
+        <p class="muted">Revisao ponta a ponta executada em 2026-05-27: backend tests 29 passed; frontend lint/typecheck/build passed; cenario completo criado; interface desktop/mobile aprovada apos reinicio do next dev na porta 3001.</p>
+        <p class="muted">Link principal de teste: <a href="http://localhost:3001/visualizador?ifc_file_ids=fec4a7cb-5665-4d16-ab14-2805407dde34,0e4623d3-95bd-4701-894f-19062ff2c95d">Visualizador completo</a>.</p>
+        <p class="muted">Marco atual: Versao Alfa / Phase 9 GO com condicoes para piloto/Alfa; ajustes de interface seguem pendentes antes de ampliar uso.</p>
         <p class="muted">Direcao de produto: validar primeiro a jornada de auditoria IFC; criterios CSV/XLS/IDS MVP, score por criticidade, relatorio tecnico, viewer por elemento e fluxo leve ficam na Alfa.</p>
         <p class="muted">BCF, IDS ampliado, API publica e self-host ficam para Phase 10/Beta, apos validacao da Alfa e definicao de suporte.</p>
         <p class="muted">Fonte: validacao de codigo/testes local + checklist de controle.</p>
@@ -169,7 +171,7 @@
           </div>
           <div class="kpi">
             <span>Qualidade atual</span>
-            <strong>Alfa partial</strong>
+            <strong>Alfa GO cond.</strong>
           </div>
         </div>
       </section>
@@ -251,10 +253,10 @@
             </tr>
             <tr>
               <td>Phase 9 - Release readiness</td>
-              <td><span class="badge partial">PARTIAL</span></td>
-              <td><div class="bar"><span style="width: 92%"></span></div></td>
-              <td>Checklist de release, guia de auditoria rapida, plano de monitoramento/suporte, registro de sign-off, gate tecnico, aceite automatizado com IFC real, rollback dry-run e Google login preparados.</td>
-              <td class="risk">Sign-off nominal e rotacao/canal de suporte ainda pendentes.</td>
+              <td><span class="badge partial">GO COND.</span></td>
+              <td><div class="bar"><span style="width: 96%"></span></div></td>
+              <td>Checklist de release, guia de auditoria rapida, suporte Equipe MaxiCAD, canal suporte@maxicad.com.br, sign-off GO com condicoes, gate tecnico, aceite automatizado com IFC real, rollback dry-run e Google login preparados.</td>
+              <td class="risk">Ajustes de interface e wiring de dashboards/alertas de producao ainda pendentes antes de ampliar uso.</td>
             </tr>
             <tr>
               <td>Phase 10 - Beta openBIM extensions and deployment model</td>

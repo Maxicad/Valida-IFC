@@ -1,7 +1,7 @@
 # Stakeholder GO Sign-Off Request - Valida IFC
 
-Date: 2026-05-24
-Status: Ready for formal approval; signatures and support rotation names pending external confirmation.
+Date: 2026-05-26
+Status: Formal approval recorded as GO with conditions for pilot/Alfa; interface adjustments remain pending before expanded use.
 
 ## Requested Decision
 
@@ -36,23 +36,23 @@ Please review the Phase 9 release evidence and record one of the following decis
 
 | Area | Name | Decision | Date | Notes |
 | --- | --- | --- | --- | --- |
-| Product acceptance | TBD | Pending | TBD |  |
-| BIM/domain acceptance | TBD | Pending | TBD |  |
-| Technical release | TBD | Pending | TBD |  |
-| Operations/support | TBD | Pending | TBD |  |
+| Product acceptance | Adriano - MaxiCAD | GO with conditions | 2026-05-26 | Many interface adjustments still expected. |
+| BIM/domain acceptance | Adriano - MaxiCAD | GO with conditions | 2026-05-26 | GO aprovado para piloto/Alfa, com ajustes de interface pendentes antes de ampliar uso. |
+| Technical release | MaxiCAD | GO | 2026-05-26 | Technical release accepted. |
+| Operations/support | Equipe MaxiCAD | GO with conditions | 2026-05-26 | Support channel: `suporte@maxicad.com.br`. |
 
 ## Minimum Data Required to Close Production GO
 
-- Product acceptance approver name and decision.
-- BIM/domain stakeholder name and decision.
-- Technical release owner name and decision.
-- Operations/support owner name and decision.
-- Approval channel or artifact where the formal decisions are recorded.
-- Support rotation primary and backup names.
-- Notification channel for the first 72 hours after go-live.
+- Product acceptance approver name and decision: closed.
+- BIM/domain stakeholder name and decision: closed.
+- Technical release owner name and decision: closed.
+- Operations/support owner name and decision: closed.
+- Approval channel or artifact where the formal decisions are recorded: Codex conversation record, 2026-05-26.
+- Support rotation primary and backup names: closed in `docs/POST_GO_LIVE_MONITORING.md`.
+- Notification channel for the first 72 hours after go-live: `suporte@maxicad.com.br`.
 
 ## Open Conditions Before Production GO
 
-- Confirm named approvers and approval channel.
-- Confirm support rotation primary/backup names and notification channel.
+- Triage and validate interface adjustments before expanded use.
+- Connect production dashboards/alerts to the target deployment environment.
 - Confirm production/staging deployment details not represented in local compose: hostnames, TLS, secrets and image registry rollback.

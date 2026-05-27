@@ -1,0 +1,127 @@
+{
+  "scenario": {
+    "project_id": "f13c5c2f-04a9-44d3-9dd9-703c13d9e241",
+    "project_name": "Teste completo Codex 20260527194821",
+    "ifc_file_ids": [
+      "fec4a7cb-5665-4d16-ab14-2805407dde34",
+      "0e4623d3-95bd-4701-894f-19062ff2c95d"
+    ],
+    "criteria_set_id": "ceca8a61-a39a-462e-8188-818b11729b12",
+    "audit_id": "e17ae0cd-586f-44d5-9934-269621c696af",
+    "snapshot_url": "http://localhost:8000/snapshots/8_z-sXYYtYya3yyZ6pljdzS2YoBn5ulvrFnm5Nreld8"
+  },
+  "checks": [
+    {
+      "name": "demo",
+      "expected": "Demo",
+      "url": "http://localhost:3001/demo",
+      "hasExpected": false,
+      "hasErrorText": false,
+      "width": 1440,
+      "viewport": 1440,
+      "text": "{\"props\":{\"pageProps\":{\"statusCode\":500}},\"page\":\"/_error\",\"query\":{},\"buildId\":\"development\",\"isFallback\":false,\"err\":{\"name\":\"Error\",\"source\":\"server\",\"message\":\"Cannot find module './255.js'\\nRequire stack:\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\webpack-runtime.js\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\app\\\\_not-found\\\\page.js\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\node_modules\\\\.pnpm\\\\next@15.1.3_@playwright+tes_8711c875a9a1fefb5ebe5bb8a",
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "dashboard",
+      "expected": "Painel",
+      "url": "http://localhost:3001/dashboard",
+      "hasExpected": false,
+      "hasErrorText": false,
+      "width": 1440,
+      "viewport": 1440,
+      "text": "{\"props\":{\"pageProps\":{\"statusCode\":500}},\"page\":\"/_error\",\"query\":{},\"buildId\":\"development\",\"isFallback\":false,\"err\":{\"name\":\"Error\",\"source\":\"server\",\"message\":\"Cannot find module './255.js'\\nRequire stack:\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\webpack-runtime.js\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\app\\\\_not-found\\\\page.js\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\node_modules\\\\.pnpm\\\\next@15.1.3_@playwright+tes_8711c875a9a1fefb5ebe5bb8a",
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "projetos",
+      "expected": "Projetos IFC",
+      "url": "http://localhost:3001/projetos",
+      "hasExpected": false,
+      "hasErrorText": false,
+      "width": 1440,
+      "viewport": 1440,
+      "text": "Validando sessao...",
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "modelos",
+      "expected": "Modelos IFC",
+      "url": "http://localhost:3001/projetos/modelos?project_id=f13c5c2f-04a9-44d3-9dd9-703c13d9e241",
+      "hasExpected": false,
+      "hasErrorText": false,
+      "width": 1440,
+      "viewport": 1440,
+      "text": "{\"props\":{\"pageProps\":{\"statusCode\":500}},\"page\":\"/_error\",\"query\":{\"project_id\":\"f13c5c2f-04a9-44d3-9dd9-703c13d9e241\"},\"buildId\":\"development\",\"isFallback\":false,\"err\":{\"name\":\"Error\",\"source\":\"server\",\"message\":\"Cannot find module './255.js'\\nRequire stack:\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\webpack-runtime.js\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\app\\\\projetos\\\\page.js\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\node_modules\\\\.pnpm\\\\next",
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "criterios",
+      "expected": "Conjuntos de criterios",
+      "url": "http://localhost:3001/criterios",
+      "hasExpected": false,
+      "hasErrorText": false,
+      "width": 1440,
+      "viewport": 1440,
+      "text": "Validando sessao...",
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "auditorias",
+      "expected": "Auditorias IFC",
+      "url": "http://localhost:3001/auditorias",
+      "hasExpected": false,
+      "hasErrorText": false,
+      "width": 1440,
+      "viewport": 1440,
+      "text": "{\"props\":{\"pageProps\":{\"statusCode\":500}},\"page\":\"/_error\",\"query\":{},\"buildId\":\"development\",\"isFallback\":false,\"err\":{\"name\":\"Error\",\"source\":\"server\",\"message\":\"Cannot find module './255.js'\\nRequire stack:\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\webpack-runtime.js\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\app\\\\auditorias\\\\page.js\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\node_modules\\\\.pnpm\\\\next@15.1.3_@playwright+tes_8711c875a9a1fefb5ebe5bb8a",
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "visualizador",
+      "expected": "Modelos exibidos",
+      "url": "http://localhost:3001/visualizador?ifc_file_ids=fec4a7cb-5665-4d16-ab14-2805407dde34,0e4623d3-95bd-4701-894f-19062ff2c95d",
+      "hasExpected": false,
+      "hasErrorText": false,
+      "width": 1440,
+      "viewport": 1440,
+      "text": "{\"props\":{\"pageProps\":{\"statusCode\":500}},\"page\":\"/_error\",\"query\":{\"ifc_file_ids\":\"fec4a7cb-5665-4d16-ab14-2805407dde34,0e4623d3-95bd-4701-894f-19062ff2c95d\"},\"buildId\":\"development\",\"isFallback\":false,\"err\":{\"name\":\"Error\",\"source\":\"server\",\"message\":\"Cannot find module './255.js'\\nRequire stack:\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\webpack-runtime.js\\n- C:\\\\MaxiCAD_Projetos_IA\\\\Valida-IFC\\\\apps\\\\web\\\\.next\\\\server\\\\app\\\\auditorias\\\\page.js\\n- C:\\\\MaxiCAD_Projetos_",
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "relatorios",
+      "expected": "Relatorios e snapshots",
+      "url": "http://localhost:3001/relatorios",
+      "hasExpected": false,
+      "hasErrorText": false,
+      "width": 1440,
+      "viewport": 1440,
+      "text": "Validando sessao...",
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "login-mobile",
+      "expected": "Comece do seu jeito",
+      "url": "http://localhost:3001/login",
+      "hasExpected": false,
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "projetos-mobile",
+      "expected": "Projetos IFC",
+      "url": "http://localhost:3001/projetos",
+      "hasExpected": false,
+      "hasHorizontalOverflow": false
+    },
+    {
+      "name": "visualizador-mobile",
+      "expected": "Painel",
+      "url": "http://localhost:3001/visualizador?ifc_file_ids=fec4a7cb-5665-4d16-ab14-2805407dde34,0e4623d3-95bd-4701-894f-19062ff2c95d",
+      "hasExpected": false,
+      "hasHorizontalOverflow": false
+    }
+  ],
+  "reportStatus": 200,
+  "snapshotStatus": 200,
+  "relevantErrors": []
+}

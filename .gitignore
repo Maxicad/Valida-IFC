@@ -23,6 +23,8 @@ venv/
 # Generated and uploaded files
 infra/storage/*
 !infra/storage/.gitkeep
+infra/*.log
+infra/logs/
 samples/ifc/*.ifc
 !samples/ifc/.gitkeep
 samples/reports/*

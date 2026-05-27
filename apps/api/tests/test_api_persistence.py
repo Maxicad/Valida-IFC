@@ -133,7 +133,17 @@ def test_project_and_criteria_crud_use_database(client: TestClient) -> None:
         headers=headers,
     )
     assert project_response.status_code == 201
-    assert project_response.json()["name"] == "Hospital Central"
+    project_payload = project_response.json()
+    project_id = project_payload["id"]
+    assert project_payload["name"] == "Hospital Central"
+
+    update_response = client.put(
+        f"/projects/{project_id}",
+        json={"name": "Hospital Central Revisado"},
+        headers=headers,
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["name"] == "Hospital Central Revisado"
 
     criteria_set_response = client.post(
         "/criteria-sets",
@@ -163,6 +173,15 @@ def test_project_and_criteria_crud_use_database(client: TestClient) -> None:
     assert list_response.status_code == 200
     assert list_response.json()[0]["code"] == "IFC-001"
 
+    second_project_id = client.post(
+        "/projects",
+        json={"name": "Projeto para excluir", "client": "Cliente Demo"},
+        headers=headers,
+    ).json()["id"]
+    delete_response = client.delete(f"/projects/{second_project_id}", headers=headers)
+    assert delete_response.status_code == 204
+    assert client.get(f"/projects/{second_project_id}", headers=headers).status_code == 404
+
 
 def test_upload_ifc_saves_file_and_metadata(client: TestClient) -> None:
     headers = auth_headers(client)
@@ -176,6 +195,7 @@ def test_upload_ifc_saves_file_and_metadata(client: TestClient) -> None:
     ifc_content = b"ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('IFC4'));\nENDSEC;"
     upload_response = client.post(
         f"/projects/{project_id}/ifc/upload",
+        data={"discipline": "estrutura"},
         files={"file": ("modelo.ifc", ifc_content, "application/octet-stream")},
         headers=headers,
     )
@@ -184,10 +204,41 @@ def test_upload_ifc_saves_file_and_metadata(client: TestClient) -> None:
     data = upload_response.json()
     assert data["ifc_schema"] == "IFC4"
     assert data["file_size"] == len(ifc_content)
+    assert data["discipline"] == "estrutura"
 
     list_response = client.get(f"/projects/{project_id}/ifc-files", headers=headers)
     assert list_response.status_code == 200
     assert list_response.json()[0]["file_name"] == "modelo.ifc"
+    assert list_response.json()[0]["discipline"] == "estrutura"
+
+    workspace_response = client.get(f"/projects/{project_id}/ifc-workspace", headers=headers)
+    assert workspace_response.status_code == 200
+    workspace = workspace_response.json()
+    assert workspace["project_id"] == project_id
+    assert workspace["selected_ifc_file_id"] == data["id"]
+    assert workspace["viewer_data_url"].endswith("/viewer-data")
+    assert workspace["viewer_geometry_url"].endswith("/viewer-geometry")
+    assert workspace["viewer_page_url"].endswith(f"/visualizador?ifc_file_id={data['id']}")
+
+    fragment_status = client.get(f"/ifc-files/{data['id']}/viewer-fragment-cache", headers=headers)
+    assert fragment_status.status_code == 200
+    assert fragment_status.json()["cached"] is False
+
+    fragment_content = b"fragment-cache-bytes"
+    fragment_upload = client.put(
+        f"/ifc-files/{data['id']}/viewer-fragment",
+        files={"file": ("modelo.frag", fragment_content, "application/octet-stream")},
+        headers=headers,
+    )
+    assert fragment_upload.status_code == 200
+    fragment_payload = fragment_upload.json()
+    assert fragment_payload["cached"] is True
+    assert fragment_payload["byte_size"] == len(fragment_content)
+    assert fragment_payload["format_version"] == "thatopen-fragments-3.4.5"
+
+    fragment_download = client.get(f"/ifc-files/{data['id']}/viewer-fragment", headers=headers)
+    assert fragment_download.status_code == 200
+    assert fragment_download.content == fragment_content
 
 
 def test_upload_rejects_malformed_ifc(client: TestClient) -> None:
@@ -207,6 +258,92 @@ def test_upload_rejects_malformed_ifc(client: TestClient) -> None:
 
     assert response.status_code == 422
     assert "Malformed IFC" in response.json()["detail"]
+
+
+def test_ifc_discipline_can_be_auto_detected_and_updated(client: TestClient) -> None:
+    headers = auth_headers(client)
+    project_id = client.post(
+        "/projects",
+        json={"name": "Projeto Disciplina", "client": "Cliente Demo"},
+        headers=headers,
+    ).json()["id"]
+
+    ifc_content = b"ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('IFC4'));\nENDSEC;"
+    upload_response = client.post(
+        f"/projects/{project_id}/ifc/upload",
+        files={"file": ("modelo-estrutural.ifc", ifc_content, "application/octet-stream")},
+        headers=headers,
+    )
+    assert upload_response.status_code == 201
+    ifc_file_id = upload_response.json()["id"]
+    assert upload_response.json()["discipline"] == "estrutura"
+
+    update_response = client.put(
+        f"/ifc-files/{ifc_file_id}/discipline",
+        json={"discipline": "arquitetura"},
+        headers=headers,
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["discipline"] == "arquitetura"
+
+    auto_response = client.put(
+        f"/ifc-files/{ifc_file_id}/discipline",
+        json={"discipline": None},
+        headers=headers,
+    )
+    assert auto_response.status_code == 200
+    assert auto_response.json()["discipline"] == "estrutura"
+
+
+def test_delete_project_removes_related_ifc_and_audits(client: TestClient) -> None:
+    headers = auth_headers(client)
+    project_id = client.post(
+        "/projects",
+        json={"name": "Projeto para limpeza", "client": "Cliente Demo"},
+        headers=headers,
+    ).json()["id"]
+
+    ifc_content = b"ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('IFC4'));\nENDSEC;"
+    ifc_file_id = client.post(
+        f"/projects/{project_id}/ifc/upload",
+        files={"file": ("cleanup.ifc", ifc_content, "application/octet-stream")},
+        headers=headers,
+    ).json()["id"]
+
+    criteria_set_id = client.post(
+        "/criteria-sets",
+        json={"name": "Criterios limpeza", "source_type": "manual"},
+        headers=headers,
+    ).json()["id"]
+    client.post(
+        "/criteria",
+        json={
+            "criteria_set_id": criteria_set_id,
+            "code": "IFC-001",
+            "name": "Schema IFC",
+            "severity": "alta",
+            "rule_type": "ifc_schema",
+            "property_name": "FILE_SCHEMA",
+            "operator": "in",
+            "expected_value": "IFC4|IFC4X3",
+        },
+        headers=headers,
+    )
+    audit_id = client.post(
+        "/audits?mode=sync",
+        json={
+            "project_id": project_id,
+            "ifc_file_id": ifc_file_id,
+            "criteria_set_id": criteria_set_id,
+        },
+        headers=headers,
+    ).json()["id"]
+
+    delete_response = client.delete(f"/projects/{project_id}", headers=headers)
+    assert delete_response.status_code == 204
+    assert client.get(f"/projects/{project_id}", headers=headers).status_code == 404
+    assert client.get(f"/ifc-files/{ifc_file_id}", headers=headers).status_code == 404
+    assert client.get(f"/audits/{audit_id}", headers=headers).status_code == 404
 
 
 def test_import_criteria_and_run_audit(client: TestClient) -> None:

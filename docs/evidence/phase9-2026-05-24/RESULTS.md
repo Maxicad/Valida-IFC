@@ -1,10 +1,11 @@
 # Phase 9 Evidence - Release Readiness
 
 Date: 2026-05-24
+Sign-off update: 2026-05-26
 Timezone: America/Sao_Paulo
 Commit: df2cd77
 Owner: Product + Engineering
-Decision: NO-GO for production; GO for Google login gate; PARTIAL/GO for stakeholder UAT and sign-off preparation.
+Decision: GO with conditions for pilot/Alfa; expanded production use pending interface adjustments and production dashboard/alert wiring.
 
 ## Completed in this update
 
@@ -65,12 +66,22 @@ Decision: NO-GO for production; GO for Google login gate; PARTIAL/GO for stakeho
 
 ## Blockers for production GO
 
-- Stakeholder sign-off cannot be completed without named approvers and acceptance notes.
-- Support rotation has no named primary/backup owners yet.
-- External production-like staging details remain a deployment risk to confirm with the production environment owner: hostnames, TLS, secrets and image registry rollback.
+- Stakeholder sign-off was recorded on 2026-05-26 as GO with conditions:
+  - Product owner: Adriano - MaxiCAD.
+  - BIM/domain stakeholder: Adriano - MaxiCAD.
+  - Engineering release owner: MaxiCAD.
+  - Operations/support owner: Equipe MaxiCAD.
+- Support rotation was named on 2026-05-26:
+  - Engineering on-call: Equipe MaxiCAD / Equipe MaxiCAD.
+  - Product/BIM support: Equipe MaxiCAD / Equipe MaxiCAD.
+  - Stakeholder contact: Adriano - MaxiCAD / Equipe MaxiCAD.
+  - Incident notification channel: `suporte@maxicad.com.br`.
+  - 72-hour monitoring owner: Equipe MaxiCAD.
+- Open condition: interface adjustments remain pending before expanding use.
+- External production-like staging details remain a deployment risk to confirm with the production environment owner: hostnames, TLS, secrets, dashboards/alerts and image registry rollback.
 
 ## Next required evidence
 
-1. Fill `docs/SIGN_OFF_REGISTER.md` with named approvals after stakeholder UAT.
-2. Assign support rotation owners and connect production monitoring/notification channels.
+1. Triage, prioritize and validate the pending interface adjustments before expanded use.
+2. Connect production dashboards/alerts and confirm the notification flow through `suporte@maxicad.com.br`.
 3. Validate external production-like staging details with the production environment owner: hostnames, TLS, secrets and image registry rollback.

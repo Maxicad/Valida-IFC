@@ -75,13 +75,13 @@ export default function AuditsPage() {
       return "Carregando as opcoes mais recentes...";
     }
     if (!selectedProject) {
-      return "Cadastre um projeto para liberar a auditoria rapida.";
+      return "Cadastre um projeto para liberar a auditoria rápida.";
     }
     if (!selectedIfcFile) {
       return "Envie um IFC para este projeto antes de executar.";
     }
     if (!selectedCriteriaSet) {
-      return "Importe ou cadastre criterios antes de executar.";
+      return "Importe ou cadastre critérios antes de executar.";
     }
     return "Pronto para executar com os dados mais recentes.";
   }, [loadingData, selectedCriteriaSet, selectedIfcFile, selectedProject]);
@@ -105,7 +105,7 @@ export default function AuditsPage() {
           : newestCriteriaSet(loadedCriteriaSets)?.id || "",
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar dados de auditoria.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar dados de auditoria.");
     } finally {
       setLoadingData(false);
     }
@@ -125,14 +125,14 @@ export default function AuditsPage() {
         files.some((ifcFile) => ifcFile.id === current) ? current : newestIfcFile(files)?.id || "",
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar arquivos IFC.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar arquivos IFC.");
     }
   }
 
   async function runAudit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selectedProjectId || !selectedIfcFileId || !selectedCriteriaSetId) {
-      setError("Selecione projeto, arquivo IFC e conjunto de criterios.");
+      setError("Selecione projeto, arquivo IFC e conjunto de critérios.");
       return;
     }
 
@@ -163,7 +163,7 @@ export default function AuditsPage() {
         setError(finalAudit.error_message ?? "Falha ao executar auditoria.");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel executar auditoria.");
+      setError(err instanceof Error ? err.message : "Não foi possível executar a auditoria.");
     } finally {
       setLoading(false);
     }
@@ -227,7 +227,7 @@ export default function AuditsPage() {
         <Card className="p-4 md:p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-ink">Auditoria rapida</h2>
+              <h2 className="text-lg font-semibold text-ink">Auditoria rápida</h2>
               <p className="mt-1 text-sm text-ink/60">{quickModeMessage}</p>
             </div>
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-steel/20 bg-steel/10 text-steel">
@@ -310,7 +310,7 @@ export default function AuditsPage() {
                 </label>
 
                 <label className="block text-sm font-medium text-ink/90">
-                  Conjunto de criterios
+                  Conjunto de critérios
                   <select
                     className="mt-2 h-10 w-full rounded-md border border-line bg-white px-3 outline-none focus:ring-2 focus:ring-steel/25"
                     onChange={(event) => setSelectedCriteriaSetId(event.target.value)}
@@ -387,10 +387,10 @@ export default function AuditsPage() {
             </div>
           )}
 
-          <h3 className="mt-6 text-sm font-semibold uppercase tracking-wide text-ink/55">Resumo por criterio</h3>
+          <h3 className="mt-6 text-sm font-semibold uppercase tracking-wide text-ink/55">Resumo por critério</h3>
           <div className="mt-2 overflow-hidden rounded-md border border-line">
             {summaryRows.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-ink/60">Nenhuma auditoria executada nesta sessao.</div>
+              <div className="px-4 py-3 text-sm text-ink/60">Nenhuma auditoria executada nesta sessão.</div>
             ) : (
               summaryRows.map((result) => (
                 <div

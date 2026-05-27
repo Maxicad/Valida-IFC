@@ -32,7 +32,17 @@ export interface IfcFile {
   ifc_version?: string | null;
   uploaded_at: string;
   status: string;
+  discipline?: string | null;
   metadata_json?: Record<string, unknown> | null;
+}
+
+export interface IfcWorkspace {
+  project_id: string;
+  ifc_files: IfcFile[];
+  selected_ifc_file_id?: string | null;
+  viewer_data_url?: string | null;
+  viewer_geometry_url?: string | null;
+  viewer_page_url?: string | null;
 }
 
 export interface CriteriaSet {
@@ -176,4 +186,13 @@ export interface ViewerGeometryElement {
 export interface ViewerGeometry {
   ifc_file_id: string;
   elements: ViewerGeometryElement[];
+}
+
+export interface ViewerFragmentCache {
+  ifc_file_id: string;
+  cached: boolean;
+  fragment_url?: string | null;
+  byte_size?: number | null;
+  generated_at?: string | null;
+  format_version?: string | null;
 }

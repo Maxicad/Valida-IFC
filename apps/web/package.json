@@ -11,6 +11,7 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@thatopen/fragments": "3.4.5",
     "@valida-ifc/shared": "workspace:*",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",

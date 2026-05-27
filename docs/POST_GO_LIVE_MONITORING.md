@@ -1,7 +1,7 @@
 # Post-Go-Live Monitoring and Support Rotation - Valida IFC
 
-Last update: 2026-05-24
-Status: Monitoring plan defined; first support rotation and notification channel require named confirmation before production go-live.
+Last update: 2026-05-26
+Status: Monitoring plan defined and support rotation named for pilot/Alfa. Expanded production use remains conditional on interface adjustments and production deployment wiring.
 
 ## Monitoring sources
 
@@ -32,31 +32,41 @@ Status: Monitoring plan defined; first support rotation and notification channel
 
 | Role | Primary | Backup | Notes |
 | --- | --- | --- | --- |
-| Engineering on-call | TBD | TBD | Owns API, worker, infra and rollback. |
-| Product/BIM support | TBD | TBD | Owns pilot user triage and acceptance notes. |
-| Stakeholder contact | TBD | TBD | Owns go/no-go feedback and sign-off. |
+| Engineering on-call | Equipe MaxiCAD | Equipe MaxiCAD | Owns API, worker, infra and rollback. |
+| Product/BIM support | Equipe MaxiCAD | Equipe MaxiCAD | Owns pilot user triage and acceptance notes. |
+| Stakeholder contact | Adriano - MaxiCAD | Equipe MaxiCAD | Owns go/no-go feedback and sign-off. |
 
 ## Required activation values
 
 | Required value | Status |
 | --- | --- |
-| Engineering on-call primary | Missing |
-| Engineering on-call backup | Missing |
-| Product/BIM support primary | Missing |
-| Product/BIM support backup | Missing |
-| Stakeholder contact primary | Missing |
-| Stakeholder contact backup | Missing |
-| Notification channel for incidents and go-live updates | Missing |
-| First 72-hour monitoring calendar owner | Missing |
+| Engineering on-call primary | Equipe MaxiCAD |
+| Engineering on-call backup | Equipe MaxiCAD |
+| Product/BIM support primary | Equipe MaxiCAD |
+| Product/BIM support backup | Equipe MaxiCAD |
+| Stakeholder contact primary | Adriano - MaxiCAD |
+| Stakeholder contact backup | Equipe MaxiCAD |
+| Notification channel for incidents and go-live updates | `suporte@maxicad.com.br` |
+| First 72-hour monitoring calendar owner | Equipe MaxiCAD |
 
 ## Activation checklist
 
 - [x] Monitoring endpoints and incident drill documented.
 - [x] Alert thresholds are configurable through environment variables.
 - [x] Queue/audit failure visibility validated in previous phase evidence.
-- [ ] Named support rotation approved.
-- [ ] Notification channel selected.
-- [ ] First 72-hour monitoring calendar created.
+- [x] Named support rotation approved.
+- [x] Notification channel selected.
+- [x] First 72-hour monitoring owner named.
 - [ ] Production dashboards/alerts connected to deployment environment.
 
-Current operational state: active for pilot readiness tracking, pending named rotation and production deployment wiring.
+Current operational state: active for pilot/Alfa readiness tracking. The named support rotation is defined; production deployment dashboards/alerts still need to be connected in the target environment.
+
+## Fast fill to activate rotation
+
+Provide these values to activate support rotation and clear the production blocker:
+
+- Engineering on-call primary and backup names: Equipe MaxiCAD / Equipe MaxiCAD.
+- Product/BIM support primary and backup names: Equipe MaxiCAD / Equipe MaxiCAD.
+- Stakeholder contact primary and backup names: Adriano - MaxiCAD / Equipe MaxiCAD.
+- Incident notification channel: `suporte@maxicad.com.br`.
+- 72-hour monitoring calendar owner: Equipe MaxiCAD.

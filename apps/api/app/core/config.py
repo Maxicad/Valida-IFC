@@ -31,9 +31,17 @@ class Settings(BaseSettings):
     alert_audit_failure_threshold: int = 1
     viewer_geometry_max_elements: int = 300
     viewer_geometry_max_triangles_per_element: int = 30000
+    viewer_fragment_max_bytes: int = 100 * 1024 * 1024
     google_client_id: str | None = None
     google_allowed_hosted_domains: list[str] = Field(default_factory=list)
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    cors_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3001",
+        ]
+    )
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

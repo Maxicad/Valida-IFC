@@ -1,0 +1,99 @@
+{
+  "project": {
+    "name": "Teste completo Codex 20260527194821",
+    "client": "QA Valida IFC",
+    "description": "Cenario criado automaticamente para revisao ponta a ponta.",
+    "discipline": null,
+    "phase": null,
+    "responsible": null,
+    "status": "em_preparacao",
+    "id": "f13c5c2f-04a9-44d3-9dd9-703c13d9e241",
+    "created_at": "2026-05-27T19:48:23.335164",
+    "updated_at": "2026-05-27T19:48:23.376049"
+  },
+  "ifcFiles": [
+    {
+      "id": "fec4a7cb-5665-4d16-ab14-2805407dde34",
+      "project_id": "f13c5c2f-04a9-44d3-9dd9-703c13d9e241",
+      "file_name": "modelo-e2e.ifc",
+      "file_size": 397,
+      "ifc_schema": "IFC4",
+      "ifc_version": "IFC4",
+      "uploaded_at": "2026-05-27T19:48:23.715076",
+      "status": "metadata_extracted",
+      "discipline": "arquitetura",
+      "metadata_json": {
+        "schema": "IFC4",
+        "ifc_version": "IFC4",
+        "header_bytes_read": 397,
+        "discipline": "arquitetura"
+      }
+    },
+    {
+      "id": "0e4623d3-95bd-4701-894f-19062ff2c95d",
+      "project_id": "f13c5c2f-04a9-44d3-9dd9-703c13d9e241",
+      "file_name": "modelo-e2e-corrigido.ifc",
+      "file_size": 424,
+      "ifc_schema": "IFC4",
+      "ifc_version": "IFC4",
+      "uploaded_at": "2026-05-27T19:48:23.971477",
+      "status": "metadata_extracted",
+      "discipline": "coordenacao",
+      "metadata_json": {
+        "schema": "IFC4",
+        "ifc_version": "IFC4",
+        "header_bytes_read": 424,
+        "discipline": "coordenacao"
+      }
+    }
+  ],
+  "criteriaSet": {
+    "name": "Criterios E2E Codex 20260527194821",
+    "description": "Importado de criterios-e2e.csv.",
+    "source_type": "import",
+    "id": "ceca8a61-a39a-462e-8188-818b11729b12",
+    "created_at": "2026-05-27T19:48:24.116740",
+    "updated_at": "2026-05-27T19:48:24.116745"
+  },
+  "importedCriteria": 2,
+  "audit": {
+    "project_id": "f13c5c2f-04a9-44d3-9dd9-703c13d9e241",
+    "ifc_file_id": "fec4a7cb-5665-4d16-ab14-2805407dde34",
+    "criteria_set_id": "ceca8a61-a39a-462e-8188-818b11729b12",
+    "id": "e17ae0cd-586f-44d5-9934-269621c696af",
+    "status": "completed",
+    "score_percent": 50,
+    "score_low": 0,
+    "score_moderate": 0,
+    "score_high": 50,
+    "total_criteria": 2,
+    "approved_criteria": 1,
+    "failed_criteria": 1,
+    "started_at": "2026-05-27T19:48:24.436577",
+    "finished_at": "2026-05-27T19:48:24.499703",
+    "queue_job_id": null,
+    "error_message": null
+  },
+  "resultCount": 4,
+  "snapshot": {
+    "id": "93d57a99-4355-4ac1-99c5-09d03f0459f3",
+    "audit_run_id": "e17ae0cd-586f-44d5-9934-269621c696af",
+    "token": "8_z-sXYYtYya3yyZ6pljdzS2YoBn5ulvrFnm5Nreld8",
+    "view_url": "/snapshots/8_z-sXYYtYya3yyZ6pljdzS2YoBn5ulvrFnm5Nreld8",
+    "report_html_url": "/snapshots/8_z-sXYYtYya3yyZ6pljdzS2YoBn5ulvrFnm5Nreld8/report/html",
+    "expires_at": "2026-06-26T19:48:24.592121"
+  },
+  "links": {
+    "login": "http://localhost:3001/login",
+    "demo": "http://localhost:3001/demo",
+    "dashboard": "http://localhost:3001/dashboard",
+    "projetos": "http://localhost:3001/projetos",
+    "modelos": "http://localhost:3001/projetos/modelos?project_id=f13c5c2f-04a9-44d3-9dd9-703c13d9e241",
+    "criterios": "http://localhost:3001/criterios",
+    "auditorias": "http://localhost:3001/auditorias",
+    "visualizador": "http://localhost:3001/visualizador?ifc_file_ids=fec4a7cb-5665-4d16-ab14-2805407dde34,0e4623d3-95bd-4701-894f-19062ff2c95d",
+    "relatorios": "http://localhost:3001/relatorios",
+    "relatorioHtml": "http://localhost:8000/audits/e17ae0cd-586f-44d5-9934-269621c696af/report/html",
+    "snapshot": "http://localhost:8000/snapshots/8_z-sXYYtYya3yyZ6pljdzS2YoBn5ulvrFnm5Nreld8"
+  }
+}

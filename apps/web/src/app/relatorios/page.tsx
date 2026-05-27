@@ -64,7 +64,7 @@ export default function ReportsPage() {
         return loadedProjects[0]?.id ?? "";
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar projetos.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar projetos.");
     } finally {
       setLoading(false);
     }
@@ -85,7 +85,7 @@ export default function ReportsPage() {
       setBaseAuditId((current) => (rows.some((audit) => audit.id === current) ? current : rows[1]?.id ?? rows[0]?.id ?? ""));
       setTargetAuditId((current) => (rows.some((audit) => audit.id === current) ? current : rows[0]?.id ?? ""));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar historico.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar histórico.");
     }
   }
 
@@ -103,7 +103,7 @@ export default function ReportsPage() {
       );
       setComparison(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel comparar auditorias.");
+      setError(err instanceof Error ? err.message : "Não foi possível comparar auditorias.");
     } finally {
       setComparing(false);
     }
@@ -116,7 +116,7 @@ export default function ReportsPage() {
       const snapshot = await apiPost<AuditSnapshot>(`/audits/${auditId}/snapshots`, { expires_in_days: 30 });
       setSnapshotLinks((current) => ({ ...current, [auditId]: snapshot }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel criar snapshot.");
+      setError(err instanceof Error ? err.message : "Não foi possível criar snapshot.");
     } finally {
       setCreatingSnapshotFor(null);
     }
@@ -138,7 +138,7 @@ export default function ReportsPage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-steel">Historico e Evidencia</p>
             <h1 className="mt-1 text-2xl font-semibold text-ink">Relatorios e snapshots</h1>
             <p className="mt-2 max-w-2xl text-sm text-ink/65">
-              Acompanhe execucoes, compare resultados e gere links read-only para auditorias concluidas.
+              Acompanhe execuções, compare resultados e gere links read-only para auditorias concluídas.
             </p>
           </div>
           <Button onClick={() => void loadProjects()} type="button" variant="secondary">
@@ -244,7 +244,7 @@ export default function ReportsPage() {
         <Card className="p-4 md:p-5">
           <div className="flex items-center gap-2">
             <ArrowRightLeft className="h-5 w-5 text-steel" />
-            <h2 className="text-lg font-semibold text-ink">Comparacao de execucoes</h2>
+            <h2 className="text-lg font-semibold text-ink">Comparação de execuções</h2>
           </div>
 
           <div className="mt-4 space-y-3">

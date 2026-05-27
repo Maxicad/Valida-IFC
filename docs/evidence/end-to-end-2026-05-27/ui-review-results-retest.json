@@ -1,0 +1,237 @@
+{
+  "generatedAt": "2026-05-27T19:57:47.105Z",
+  "tokenSource": "register-login",
+  "scenarioProjectId": "f13c5c2f-04a9-44d3-9dd9-703c13d9e241",
+  "scenarioAuditId": "e17ae0cd-586f-44d5-9934-269621c696af",
+  "results": [
+    {
+      "name": "demo",
+      "url": "http://127.0.0.1:3001/demo",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 1440,
+        "iw": 1440,
+        "body": 1440
+      },
+      "canvasInfo": [],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\demo-desktop-retest.png",
+      "textSample": "Voltar ao login\nDemo - Fluxo assistido\n\nAmbiente demonstrativo com dados ficticios. Teste a jornada sem login e salve o progresso criando conta.\n\nSalvar progresso criando conta\nValida IFC\nDemo sem autenticacao\nNova validacao\nJORNADA ATUAL\nProjeto\nconcluido\nIFC\nconcluido\nCriterios\nconcluido\n4\nAuditoria\nem execucao\n5\nEntrega\nproximo\n\nAUDITORIA GUIADA\n\nHospital Central - Arquitetura.ifc\n\nProxima acao clara, menos telas intermediarias e resumo de impacto antes da entrega.\n\nExecutar agora\n86%\nScore p"
+    },
+    {
+      "name": "dashboard",
+      "url": "http://127.0.0.1:3001/dashboard",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 1440,
+        "iw": 1440,
+        "body": 1440
+      },
+      "canvasInfo": [],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\dashboard-desktop-retest.png",
+      "textSample": "IFC\nValida IFC\nFluxo assistido de auditoria\nNova validacao\nSair\n\nPAINEL OPERACIONAL\n\nDashboard de validação IFC\n\nAcompanhe projetos, conjuntos de critérios e o andamento da validação de forma centralizada.\n\nAtualizar dados\n\nProjetos ativos\n\n17\n\nCadastro operacional\n\nConjuntos de critérios\n\n16\n\nRegras disponíveis\n\nAuditorias pendentes\n\n-\n\nFila de processamento\n\nFalhas críticas\n\n-\n\nApós auditoria\n\nProjetos recentes\nVer todos\nPROJETO\nCLIENTE\nSTATUS\nTeste completo Codex 20260527194821\nQA Valida IFC\n"
+    },
+    {
+      "name": "projetos",
+      "url": "http://127.0.0.1:3001/projetos",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 1440,
+        "iw": 1440,
+        "body": 1440
+      },
+      "canvasInfo": [],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\projetos-desktop-retest.png",
+      "textSample": "IFC\nValida IFC\nFluxo assistido de auditoria\nNova validacao\nSair\n\nPROJETOS\n\nProjetos IFC\n\nCrie um projeto para reunir arquivos IFC, criterios e resultados de auditoria.\n\nNovo projeto\nAtualizar\nFILTRAR POR PROJETO\nFILTRAR POR CLIENTE\nSTATUS\nAtivos\nArquivados\nTodos\n17 projeto(s)\nPROJETO\nCLIENTE\nSTATUS\nCRIADO EM\nACOES\nTeste completo Codex 20260527194821\nQA Valida IFC\nEM PREPARACAO\n27/05/2026\nHospital Central\nCliente Demo\nEM PREPARACAO\n27/05/2026\nPhase 5 Real IFC 1779563819883-1\nMaxiCAD\nEM PREPARACAO"
+    },
+    {
+      "name": "modelos",
+      "url": "http://127.0.0.1:3001/projetos/modelos?project_id=f13c5c2f-04a9-44d3-9dd9-703c13d9e241",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 1440,
+        "iw": 1440,
+        "body": 1440
+      },
+      "canvasInfo": [],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\modelos-desktop-retest.png",
+      "textSample": "IFC\nValida IFC\nFluxo assistido de auditoria\nNova validacao\nSair\nModelos IFC\n\nCada projeto pode receber vários modelos IFC. Depois de carregar os modelos, abra no visualizador em modo federado.\n\nEscolha o arquivo IFC\n\nInforme a disciplina para coloração por modelo no visualizador.\n\nProjeto\nSelecione um projeto\nTeste completo Codex 20260527194821\nHospital Central\nPhase 5 Real IFC 1779563819883-1\nPhase 5 Real IFC 1779563341576-1\nPhase 5 Real IFC 1779562638540-1\nPhase 5 Real IFC 1779560356691-1\nPhas"
+    },
+    {
+      "name": "criterios",
+      "url": "http://127.0.0.1:3001/criterios",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 1440,
+        "iw": 1440,
+        "body": 1440
+      },
+      "canvasInfo": [],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\criterios-desktop-retest.png",
+      "textSample": "IFC\nValida IFC\nFluxo assistido de auditoria\nNova validacao\nSair\nCriterios\n\nDefina o que o modelo precisa atender antes da auditoria.\n\nAtualizar\nImportar\nNovo\nSelecione um conjunto\nCriterios E2E Codex 20260527194821\nPhase 5 viewer performance 1779563857719\nPhase 5 viewer performance 1779563615735\nPhase 5 viewer performance 1779563380582\nPhase 5 viewer performance 1779562683709\nPhase 5 viewer performance 1779560396836\nPhase 5 viewer performance 1779560144396\nPhase 5 viewer performance 177955992967"
+    },
+    {
+      "name": "auditorias",
+      "url": "http://127.0.0.1:3001/auditorias",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 1440,
+        "iw": 1440,
+        "body": 1440
+      },
+      "canvasInfo": [],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\auditorias-desktop-retest.png",
+      "textSample": "IFC\nValida IFC\nFluxo assistido de auditoria\nNova validacao\nSair\n\nEXECUCAO DE REGRAS\n\nAuditorias IFC\n\nExecute a auditoria com os dados mais recentes ou ajuste a selecao quando precisar.\n\nAtualizar base\nAuditoria rápida\n\nPronto para executar com os dados mais recentes.\n\nPROJETO\nTeste completo Codex 20260527194821\nARQUIVO IFC\nmodelo-e2e-corrigido.ifc (IFC4)\nCRITERIOS\nCriterios E2E Codex 20260527194821\nExecutar auditoria\nAjustes opcionais\nDefaults: mais recentes\nProjeto\nSelecione\nTeste completo Code"
+    },
+    {
+      "name": "visualizador",
+      "url": "http://127.0.0.1:3001/visualizador?ifc_file_ids=fec4a7cb-5665-4d16-ab14-2805407dde34,0e4623d3-95bd-4701-894f-19062ff2c95d",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 1440,
+        "iw": 1440,
+        "body": 1440
+      },
+      "canvasInfo": [
+        {
+          "w": 1322,
+          "h": 804,
+          "clientW": 1322,
+          "clientH": 804
+        }
+      ],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\visualizador-desktop-retest.png",
+      "textSample": "IFC\nValida IFC\nFluxo assistido de auditoria\nNova validacao\nSair\nPROJETO\nSelecione\nTeste completo Codex 20260527194821\nHospital Central\nPhase 5 Real IFC 1779563819883-1\nPhase 5 Real IFC 1779563341576-1\nPhase 5 Real IFC 1779562638540-1\nPhase 5 Real IFC 1779560356691-1\nPhase 5 Real IFC 1779560104346-1\nPhase 5 Real IFC 1779559889740-1\nPhase 5 Real IFC 1779559169842-1\nPhase 5 Real IFC 1779559057959-1\nPhase 5 Real IFC 1779558929158-1\nPhase 5 Real IFC 1779558786017-1\nPhase 5 Real IFC 1779558575129-1\nPh"
+    },
+    {
+      "name": "relatorios",
+      "url": "http://127.0.0.1:3001/relatorios",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 1440,
+        "iw": 1440,
+        "body": 1440
+      },
+      "canvasInfo": [],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\relatorios-desktop-retest.png",
+      "textSample": "IFC\nValida IFC\nFluxo assistido de auditoria\nNova validacao\nSair\n\nHISTORICO E EVIDENCIA\n\nRelatorios e snapshots\n\nAcompanhe execuções, compare resultados e gere links read-only para auditorias concluídas.\n\nAtualizar\nTimeline do projeto\nProjeto\nSelecione\nTeste completo Codex 20260527194821\nHospital Central\nPhase 5 Real IFC 1779563819883-1\nPhase 5 Real IFC 1779563341576-1\nPhase 5 Real IFC 1779562638540-1\nPhase 5 Real IFC 1779560356691-1\nPhase 5 Real IFC 1779560104346-1\nPhase 5 Real IFC 1779559889740"
+    },
+    {
+      "name": "login",
+      "url": "http://127.0.0.1:3001/login",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 390,
+        "iw": 390,
+        "body": 390
+      },
+      "canvasInfo": [],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\login-mobile-retest.png",
+      "textSample": "IFC\nFLUXO ASSISTIDO\nConheca o Valida IFC antes de entrar\n\nEntenda o fluxo, teste uma demo sem cadastro e crie a conta somente quando quiser salvar o progresso.\n\nAbrir demo\nTELA 1\nProjeto\nOrganiza cliente, disciplina e escopo.\nTELA 2\nArquivo IFC\nCarrega modelo e metadados principais.\nTELA 3\nAuditoria\nExecuta regras e entrega evidencias.\nCONHECA ANTES DE ENTRAR\n3 passos\nValide modelos IFC com criterios claros\n\nOrganize projeto, arquivo IFC e regras de auditoria em uma jornada unica.\n\nProjeto\nIFC\nR"
+    },
+    {
+      "name": "projetos",
+      "url": "http://127.0.0.1:3001/projetos",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 390,
+        "iw": 390,
+        "body": 390
+      },
+      "canvasInfo": [],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\projetos-mobile-retest.png",
+      "textSample": "IFC\nValida IFC\nFluxo assistido de auditoria\nNova validacao\nSair\n\nPROJETOS\n\nProjetos IFC\n\nCrie um projeto para reunir arquivos IFC, criterios e resultados de auditoria.\n\nNovo projeto\nAtualizar\nFILTRAR POR PROJETO\nFILTRAR POR CLIENTE\nSTATUS\nAtivos\nArquivados\nTodos\n17 projeto(s)\nTeste completo Codex 20260527194821\nQA Valida IFC\nEM PREPARACAO\n27/05/2026\nHospital Central\nCliente Demo\nEM PREPARACAO\n27/05/2026\nPhase 5 Real IFC 1779563819883-1\nMaxiCAD\nEM PREPARACAO\n23/05/2026\nPhase 5 Real IFC 1779563341"
+    },
+    {
+      "name": "visualizador",
+      "url": "http://127.0.0.1:3001/visualizador?ifc_file_ids=fec4a7cb-5665-4d16-ab14-2805407dde34,0e4623d3-95bd-4701-894f-19062ff2c95d",
+      "status": 200,
+      "ok": true,
+      "found": true,
+      "bad": [],
+      "errors": [],
+      "overflow": {
+        "x": false,
+        "sw": 390,
+        "iw": 390,
+        "body": 390
+      },
+      "canvasInfo": [
+        {
+          "w": 372,
+          "h": 748,
+          "clientW": 372,
+          "clientH": 748
+        }
+      ],
+      "screenshot": "C:\\MaxiCAD_Projetos_IA\\Valida-IFC\\docs\\evidence\\end-to-end-2026-05-27\\visualizador-mobile-retest.png",
+      "textSample": "IFC\nValida IFC\nFluxo assistido de auditoria\nNova validacao\nSair\nPROJETO\nSelecione\nTeste completo Codex 20260527194821\nHospital Central\nPhase 5 Real IFC 1779563819883-1\nPhase 5 Real IFC 1779563341576-1\nPhase 5 Real IFC 1779562638540-1\nPhase 5 Real IFC 1779560356691-1\nPhase 5 Real IFC 1779560104346-1\nPhase 5 Real IFC 1779559889740-1\nPhase 5 Real IFC 1779559169842-1\nPhase 5 Real IFC 1779559057959-1\nPhase 5 Real IFC 1779558929158-1\nPhase 5 Real IFC 1779558786017-1\nPhase 5 Real IFC 1779558575129-1\nPh"
+    }
+  ],
+  "apiChecks": [
+    {
+      "name": "reportHtml",
+      "url": "http://127.0.0.1:8000/audits/e17ae0cd-586f-44d5-9934-269621c696af/report/html",
+      "status": 200,
+      "ok": true,
+      "sample": "\n    <!doctype html>\n    <html lang=\"pt-BR\">\n      <head>\n        <meta charset=\"utf-8\">\n        <title>Relatorio e17ae0cd-586f-44d5-9934-269621c696af</title>\n        <style>\n     "
+    },
+    {
+      "name": "snapshot",
+      "url": "http://127.0.0.1:8000/snapshots/8_z-sXYYtYya3yyZ6pljdzS2YoBn5ulvrFnm5Nreld8",
+      "status": 200,
+      "ok": true,
+      "sample": "\n    <!doctype html>\n    <html lang=\"pt-BR\">\n      <head>\n        <meta charset=\"utf-8\">\n        <title>Snapshot e17ae0cd-586f-44d5-9934-269621c696af</title>\n        <style>\n      "
+    }
+  ],
+  "ok": true
+}
