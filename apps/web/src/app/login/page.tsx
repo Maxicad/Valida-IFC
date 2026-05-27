@@ -2,11 +2,19 @@
 
 import {
   ArrowRight,
+  CheckCircle2,
+  ClipboardCheck,
   Eye,
   EyeOff,
+  FileSearch,
+  Gauge,
+  Layers3,
   LockKeyhole,
   Mail,
+  PlayCircle,
   Sparkles,
+  TrendingUp,
+  UploadCloud,
   UserPlus,
   UserRound,
 } from "lucide-react";
@@ -51,27 +59,57 @@ declare global {
 const onboardingSlides = [
   {
     title: "Valide modelos IFC com criterios claros",
-    detail: "Organize projeto, arquivo IFC e regras de auditoria em uma jornada unica.",
+    detail: "Organize projeto, arquivo IFC e regras de auditoria sem depender de planilhas soltas.",
     metric: "3 passos",
   },
   {
     title: "Encontre pendencias antes da entrega",
-    detail: "Veja falhas por severidade, elemento e GlobalId para agir com mais rapidez.",
+    detail: "Veja falhas por severidade, elemento e GlobalId para priorizar a revisao BIM.",
     metric: "11 alertas",
   },
   {
     title: "Gere relatorios tecnicos rastreaveis",
-    detail: "Exporte evidencias para revisao interna, cliente ou aprovacao BIM.",
+    detail: "Exporte evidencias para revisao interna, cliente ou aprovacao com historico claro.",
     metric: "PDF + HTML",
   },
+];
+
+const workflowCards = [
+  {
+    title: "Suba o IFC",
+    detail: "O sistema identifica schema, disciplina e prepara o modelo para visualizacao.",
+    icon: UploadCloud,
+  },
+  {
+    title: "Aplique criterios",
+    detail: "Use regras universais ou importe criterios do seu cliente em CSV, IDS ou texto.",
+    icon: ClipboardCheck,
+  },
+  {
+    title: "Revise no viewer",
+    detail: "Abra falhas por GlobalId, filtre por severidade e gere evidencia tecnica.",
+    icon: FileSearch,
+  },
+];
+
+const tractionTips = [
+  "Teste a demo antes de cadastrar um projeto real.",
+  "Comece com um IFC pequeno para calibrar criterios.",
+  "Prepare o viewer rapido antes de reunioes de revisao.",
+];
+
+const trustSignals = [
+  { label: "Viewer", value: "cache rapido", icon: Gauge },
+  { label: "Auditoria", value: "rastreavel", icon: CheckCircle2 },
+  { label: "Relatorio", value: "PDF + HTML", icon: Layers3 },
 ];
 
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"login" | "register">("login");
-  const [name, setName] = useState("Auditor BIM");
-  const [email, setEmail] = useState("auditor@example.com");
-  const [password, setPassword] = useState("secret123");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -162,21 +200,40 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen bg-[#e9efec] px-4 py-6 text-[#203a33] md:px-8">
       <section className="mx-auto grid min-h-[calc(100vh-48px)] w-full max-w-6xl overflow-hidden rounded-lg border border-[#d3ded8] bg-white shadow-[0_18px_48px_rgba(45,42,35,0.11)] lg:grid-cols-[1fr_0.82fr]">
-        <aside className="p-6 md:p-8">
+        <aside className="bg-[#f7faf8] p-6 md:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-md bg-[#203a33] text-sm font-bold text-white">
                   IFC
                 </span>
-                <span className="text-sm font-semibold uppercase text-[#6a6f2f]">Fluxo assistido</span>
+                <span className="text-sm font-semibold uppercase tracking-[0.14em] text-[#6a6f2f]">
+                  Plataforma de auditoria BIM
+                </span>
               </div>
-              <h1 className="mt-5 max-w-2xl text-3xl font-semibold leading-tight text-[#203a33]">
-                Conheca o Valida IFC antes de entrar
+              <h1 className="mt-5 max-w-2xl text-4xl font-semibold leading-tight text-[#203a33]">
+                Valide IFC com menos retrabalho e mais evidencia
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[#5d6a62]">
-                Entenda o fluxo, teste uma demo sem cadastro e crie a conta somente quando quiser salvar o progresso.
+                Transforme modelos, criterios e relatorios em uma rotina unica para revisar antes da entrega BIM.
               </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Link
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#203a33] px-4 text-sm font-semibold text-white transition hover:bg-[#2f6f73]"
+                  href="/demo"
+                >
+                  <PlayCircle className="h-4 w-4" />
+                  Testar agora
+                </Link>
+                <button
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#d3ded8] bg-white px-4 text-sm font-semibold text-[#203a33] transition hover:bg-[#eef5f2]"
+                  onClick={() => setMode("register")}
+                  type="button"
+                >
+                  Criar conta gratis
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
             <Link
               className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-[#d3ded8] bg-white px-4 text-sm font-semibold text-[#203a33] transition hover:bg-[#eef5f2]"
@@ -187,62 +244,95 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          <div className="mt-7 grid gap-3 md:grid-cols-3">
-            {[
-              ["Projeto", "Organiza cliente, disciplina e escopo."],
-              ["Arquivo IFC", "Carrega modelo e metadados principais."],
-              ["Auditoria", "Executa regras e entrega evidencias."],
-            ].map(([title, detail], index) => (
+          <div className="mt-7 hidden gap-3 md:grid md:grid-cols-3">
+            {workflowCards.map((card, index) => {
+              const Icon = card.icon;
+              return (
               <button
-                className="rounded-md border border-[#d3ded8] bg-white px-3 py-4 text-left transition hover:bg-[#f8faf7]"
-                key={title}
+                className={`rounded-md border px-3 py-4 text-left transition ${
+                  index === activeSlide
+                    ? "border-[#203a33] bg-white shadow-[0_12px_28px_rgba(32,58,51,0.10)]"
+                    : "border-[#d3ded8] bg-white hover:bg-[#eef5f2]"
+                }`}
+                key={card.title}
                 onClick={() => setActiveSlide(index)}
                 type="button"
               >
-                <span className="text-xs font-semibold uppercase text-[#6a6f2f]">Tela {index + 1}</span>
-                <strong className="mt-1 block text-sm text-[#203a33]">{title}</strong>
-                <span className="mt-2 block text-xs leading-5 text-[#5d6a62]">{detail}</span>
+                <Icon className="h-5 w-5 text-[#6a6f2f]" />
+                <strong className="mt-3 block text-sm text-[#203a33]">{card.title}</strong>
+                <span className="mt-2 block text-xs leading-5 text-[#5d6a62]">{card.detail}</span>
               </button>
-            ))}
+              );
+            })}
           </div>
 
-          <div className="mt-7 rounded-lg bg-[#203a33] p-5 text-white">
-            <div className="rounded-lg border border-white/20 bg-white/10 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold uppercase tracking-wide text-white/70">
-                  Conheca antes de entrar
+          <div className="mt-7 hidden gap-4 md:grid xl:grid-cols-[1fr_230px]">
+            <div className="rounded-lg bg-[#203a33] p-5 text-white shadow-[0_18px_44px_rgba(32,58,51,0.20)]">
+              <div className="rounded-lg border border-white/20 bg-white/10 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-white/70">
+                    Fluxo recomendado
+                  </span>
+                  <span className="rounded-md bg-white px-2 py-1 text-xs font-bold text-[#203a33]">{slide.metric}</span>
+                </div>
+                <h2 className="mt-6 text-2xl font-semibold leading-tight">{slide.title}</h2>
+                <p className="mt-3 min-h-14 text-sm leading-6 text-white/78">{slide.detail}</p>
+                <div className="mt-6 flex items-center gap-2">
+                  {onboardingSlides.map((item, index) => (
+                    <button
+                      aria-label={`Ver tela ${index + 1}: ${item.title}`}
+                      className={`h-2.5 rounded-full transition-all ${
+                        index === activeSlide ? "w-8 bg-white" : "w-2.5 bg-white/35"
+                      }`}
+                      key={item.title}
+                      onClick={() => setActiveSlide(index)}
+                      type="button"
+                    />
+                  ))}
+                </div>
+                <div className="mt-6 grid grid-cols-3 gap-2">
+                  {["Projeto", "IFC", "Relatorio"].map((item, index) => (
+                    <button
+                      className={`rounded-md border border-white/15 px-2 py-2 text-left text-xs font-semibold text-white/82 ${
+                        index === activeSlide ? "bg-[#6a6f2f]" : ""
+                      }`}
+                      key={item}
+                      onClick={() => setActiveSlide(index)}
+                      type="button"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3">
+              {trustSignals.map((signal) => {
+                const Icon = signal.icon;
+                return (
+                  <div className="rounded-lg border border-[#d3ded8] bg-white p-4" key={signal.label}>
+                    <Icon className="h-5 w-5 text-[#6a6f2f]" />
+                    <span className="mt-3 block text-xs font-semibold uppercase text-[#5d6a62]">{signal.label}</span>
+                    <strong className="mt-1 block text-sm text-[#203a33]">{signal.value}</strong>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-4 hidden rounded-lg border border-[#d3ded8] bg-white p-4 md:block">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-[#6a6f2f]" />
+              <h2 className="font-semibold text-[#203a33]">Dicas para a primeira validacao</h2>
+            </div>
+            <div className="mt-3 grid gap-2 text-sm text-[#5d6a62]">
+              {tractionTips.map((tip) => (
+                <span className="inline-flex items-start gap-2" key={tip}>
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#5a6f54]" />
+                  {tip}
                 </span>
-                <span className="rounded-md bg-white px-2 py-1 text-xs font-bold text-[#203a33]">{slide.metric}</span>
-              </div>
-              <h2 className="mt-6 text-2xl font-semibold leading-tight">{slide.title}</h2>
-              <p className="mt-3 min-h-14 text-sm leading-6 text-white/78">{slide.detail}</p>
-              <div className="mt-6 flex items-center gap-2">
-                {onboardingSlides.map((item, index) => (
-                  <button
-                    aria-label={`Ver tela ${index + 1}: ${item.title}`}
-                    className={`h-2.5 rounded-full transition-all ${
-                      index === activeSlide ? "w-8 bg-white" : "w-2.5 bg-white/35"
-                    }`}
-                    key={item.title}
-                    onClick={() => setActiveSlide(index)}
-                    type="button"
-                  />
-                ))}
-              </div>
-              <div className="mt-6 grid grid-cols-3 gap-2">
-                {["Projeto", "IFC", "Relatorio"].map((item, index) => (
-                  <button
-                    className={`rounded-md border border-white/15 px-2 py-2 text-left text-xs font-semibold text-white/82 ${
-                      index === activeSlide ? "bg-[#6a6f2f]" : ""
-                    }`}
-                    key={item}
-                    onClick={() => setActiveSlide(index)}
-                    type="button"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
         </aside>

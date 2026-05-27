@@ -1417,7 +1417,7 @@ export default function ViewerPage() {
               </div>
             )}
 
-            <div className="absolute bottom-4 left-4 z-10 max-w-lg rounded-lg border border-white/22 bg-[#0f1514] p-3 text-white shadow-[0_18px_40px_rgba(0,0,0,0.38)]">
+            <div className="absolute bottom-20 left-4 z-10 max-w-lg rounded-lg border border-white/22 bg-[#0f1514] p-3 text-white shadow-[0_18px_40px_rgba(0,0,0,0.38)]">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="inline-flex items-center gap-1 rounded-md bg-white/16 px-2 py-1 text-white">
                   <Eye className="h-3.5 w-3.5" />
@@ -1428,15 +1428,16 @@ export default function ViewerPage() {
               </div>
             </div>
 
-            <div className="absolute left-4 top-[30rem] z-20 flex flex-col items-center rounded-lg border border-white/28 bg-black p-2 shadow-[0_18px_44px_rgba(0,0,0,0.55)]">
+            <div className="absolute bottom-4 left-1/2 z-30 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center overflow-x-auto rounded-lg border border-white/28 bg-black p-2 shadow-[0_18px_44px_rgba(0,0,0,0.55)]">
               {VIEWER_TOOL_OPTIONS.map((tool, index) => {
                 const Icon = tool.icon;
                 const active = activeViewerTool === tool.value;
                 return (
-                  <div className="flex flex-col items-center" key={tool.value}>
-                    {index === 3 || index === 5 ? <span className="my-2 h-px w-8 bg-white/18" /> : null}
+                  <div className="flex items-center" key={tool.value}>
+                    {index === 3 || index === 5 ? <span className="mx-2 h-8 w-px bg-white/18" /> : null}
                     <button
                       aria-label={tool.label}
+                      aria-pressed={active}
                       className={`inline-flex h-11 w-11 items-center justify-center rounded-md transition ${
                         active ? "bg-white text-[#0f1514]" : "text-white hover:bg-white/20"
                       }`}
